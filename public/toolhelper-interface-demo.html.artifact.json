@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "ToolHelper_Vue/public/toolhelper-interface-demo.html",
+  "entry": "ToolHelper_Vue/public/toolhelper-interface-demo.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-09-03T08:13:31.683Z",
+  "updatedAt": "2026-09-03T08:13:31.683Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

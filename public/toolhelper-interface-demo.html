@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ToolHelper 界面改进演示</title>
+  <style>
+    :root {
+      --bg: oklch(98% 0.006 220);
+      --surface: oklch(100% 0 0);
+      --fg: oklch(25% 0.035 225);
+      --muted: oklch(52% 0.025 220);
+      --border: oklch(90% 0.012 220);
+      --accent: oklch(52% 0.065 215);
+      --accent-soft: color-mix(in oklch, var(--accent) 12%, var(--surface));
+      --fg-soft: color-mix(in oklch, var(--fg) 5%, transparent);
+      --font-display: 'Microsoft YaHei UI', 'Segoe UI', system-ui, sans-serif;
+      --font-body: 'Microsoft YaHei UI', 'Segoe UI', system-ui, sans-serif;
+      --font-mono: 'Cascadia Mono', Consolas, ui-monospace, monospace;
+      --fs-h1: 24px; --fs-h2: 18px; --fs-h3: 14px; --fs-lead: 14px; --fs-body: 13px; --fs-meta: 12px;
+      --gap-xs: 4px; --gap-sm: 8px; --gap-md: 16px; --gap-lg: 24px; --gap-xl: 32px; --gap-2xl: 48px;
+      --container: none; --gutter: 24px; --radius: 6px; --radius-lg: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; overflow: hidden; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: var(--fs-body); line-height: 1.5; text-rendering: optimizeLegibility; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    svg { display: block; }
+    .app { display: grid; grid-template-columns: 248px minmax(0, 1fr); height: 100%; }
+    .sidebar { display: flex; flex-direction: column; min-width: 0; border-right: 1px solid var(--border); background: var(--surface); }
+    .brand { display: flex; align-items: center; gap: 10px; min-height: 72px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .brand-mark { width: 34px; height: 34px; flex: 0 0 auto; object-fit: contain; }
+    .brand-name { font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: -.01em; }
+    .brand-sub { color: var(--muted); font-size: 11px; }
+    .search-wrap { padding: 14px 12px 10px; }
+    .search { position: relative; }
+    .search svg { position: absolute; left: 11px; top: 50%; width: 15px; height: 15px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    .input, .select, .textarea { width: 100%; min-height: 44px; padding: 8px 10px; color: var(--fg); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+    .input:hover, .select:hover, .textarea:hover { border-color: color-mix(in oklch, var(--border), var(--fg) 28%); }
+    .input:focus, .select:focus, .textarea:focus { border-color: var(--accent); outline: 2px solid color-mix(in oklch, var(--accent) 24%, transparent); }
+    .search .input { padding-left: 34px; background: var(--bg); }
+    .nav-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 8px 16px; }
+    .nav-group { margin-top: 12px; }
+    .nav-label { padding: 0 10px 6px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .06em; }
+    .nav-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 8px 10px; border: 0; border-radius: var(--radius); background: transparent; color: var(--fg); text-align: left; }
+    .nav-item svg { width: 17px; height: 17px; flex: 0 0 auto; color: var(--muted); }
+    .nav-item:hover { background: var(--fg-soft); color: var(--fg); }
+    .nav-item.active { background: var(--accent-soft); color: color-mix(in oklch, var(--accent), var(--fg) 28%); font-weight: 650; }
+    .nav-item.active svg { color: var(--accent); }
+    .nav-empty { display: none; padding: 28px 14px; color: var(--muted); text-align: center; }
+    .sidebar-foot { display: flex; justify-content: space-between; align-items: center; min-height: 52px; padding: 8px 12px; border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; }
+    .workspace { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; min-height: 0; }
+    .page-head { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; padding: 20px 24px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    h1, h2, h3 { margin: 0; font-family: var(--font-display); }
+    h1 { font-size: var(--fs-h1); line-height: 1.25; letter-spacing: -.02em; }
+    h2 { font-size: var(--fs-h2); }
+    h3 { font-size: var(--fs-h3); }
+    .lead { margin: 4px 0 0; color: var(--muted); font-size: var(--fs-lead); }
+    .head-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; padding: 8px 13px; border: 1px solid transparent; border-radius: var(--radius); color: var(--fg); background: transparent; font-weight: 600; transition: background .15s ease, border-color .15s ease, transform .05s ease; }
+    .btn svg { width: 16px; height: 16px; }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { color: var(--surface); background: var(--accent); border-color: var(--accent); }
+    .btn-primary:hover { background: color-mix(in oklch, var(--accent), var(--fg) 14%); border-color: color-mix(in oklch, var(--accent), var(--fg) 14%); }
+    .btn-secondary { background: var(--surface); border-color: var(--border); }
+    .btn-secondary:hover { background: var(--fg-soft); border-color: color-mix(in oklch, var(--border), var(--fg) 28%); }
+    .btn-ghost:hover { background: var(--fg-soft); }
+    .btn:disabled { cursor: not-allowed; opacity: .55; }
+    .config { padding: 16px 24px; border-bottom: 1px solid var(--border); }
+    .section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .section-title h2 { font-size: 13px; }
+    .fields { display: grid; grid-template-columns: minmax(130px, 1.2fr) repeat(4, minmax(100px, 1fr)) auto; gap: 12px; align-items: end; }
+    .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .field label { color: var(--muted); font-size: 11px; font-weight: 650; }
+    .workarea { display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; margin: 16px 24px 0; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+    .serial-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; min-height: 560px; }
+    .serial-side { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 16px; min-width: 0; }
+    .serial-layout .config, .serial-layout .composer, .serial-layout .workarea { width: 100%; margin: 0; }
+    .serial-layout .config { padding: 16px; border-bottom: 0; }
+    .serial-layout .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .serial-layout .fields .btn { width: 100%; }
+    .serial-layout .composer { display: flex; flex-direction: column; }
+    .serial-layout .composer-body { flex: 1; grid-template-columns: minmax(0, 1fr); }
+    .serial-layout .textarea { min-height: 150px; }
+    .serial-layout .send-btn { width: 100%; }
+    .workbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 45px; padding: 7px 12px; border-bottom: 1px solid var(--border); }
+    .workbar-left, .workbar-right, .check { display: flex; align-items: center; gap: 12px; }
+    .check { gap: 6px; color: var(--muted); font-size: 12px; }
+    .check input { accent-color: var(--accent); }
+    .counter { color: var(--muted); font-family: var(--font-mono); font-size: 11px; }
+    .terminal { min-height: 0; overflow: auto; padding: 14px 16px; background: oklch(24% 0.025 230); color: oklch(89% 0.015 220); font: 12px/1.65 var(--font-mono); }
+    .log-line { white-space: pre-wrap; word-break: break-word; }
+    .log-time { color: oklch(65% 0.018 220); }
+    .log-rx { color: oklch(76% 0.09 190); }
+    .log-tx { color: oklch(80% 0.08 95); }
+    .empty-log { display: grid; place-items: center; min-height: 100%; color: oklch(68% 0.018 220); text-align: center; }
+    .empty-log strong { display: block; margin-bottom: 5px; color: oklch(90% 0.015 220); font-family: var(--font-body); font-size: 13px; }
+    .composer { margin: 12px 24px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+    .composer-top { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    .composer-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 10px; }
+    .textarea { min-height: 68px; resize: none; font-family: var(--font-mono); }
+    .send-btn { min-width: 88px; }
+    .advanced { display: none; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 12px; padding: 10px 12px 12px; border-top: 1px solid var(--border); }
+    .advanced.open { display: grid; }
+    .statusbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 38px; padding: 7px 24px; border-top: 1px solid var(--border); background: var(--surface); color: var(--muted); font-size: 12px; }
+    .status { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+    .status.connected .status-dot { background: oklch(58% 0.12 150); }
+    .status.error .status-dot { background: oklch(58% 0.18 25); }
+    .shortcut { font-family: var(--font-mono); font-size: 11px; }
+    .screen-content { min-height: 0; overflow: auto; padding: 20px 24px 24px; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .screen.active:has(> .detail-drawer) { display: flex; min-height: 100%; flex-direction: column; }
+    .screen.active:has(> .detail-drawer) > .detail-drawer:not(.collapsed) { display: flex; min-height: 220px; flex: 1; flex-direction: column; }
+    .screen.active:has(> .detail-drawer) > .detail-drawer:not(.collapsed) .drawer-body { display: flex; min-height: 0; flex: 1; }
+    .screen.active:has(> .detail-drawer) > .detail-drawer:not(.collapsed) .terminal-box { width: 100%; min-height: 100%; max-height: none; flex: 1; }
+    .panel { padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+    .panel + .panel { margin-top: 16px; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+    .panel-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .grid-2, .grid-3, .grid-4 { display: grid; gap: 12px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .split { display: grid; grid-template-columns: minmax(280px, .72fr) minmax(420px, 1.28fr); gap: 16px; }
+    .split > .panel + .panel { margin-top: 0; }
+    .split.equal { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+    .split.equal > .panel { display: flex; min-height: 300px; flex-direction: column; }
+    .split.equal .panel-fill { flex: 1; min-height: 220px; }
+    .stack { display: grid; gap: 12px; }
+    .metric { padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+    .metric-label { color: var(--muted); font-size: 11px; }
+    .metric-value { margin-top: 5px; font-family: var(--font-mono); font-size: 20px; font-weight: 700; }
+    .metric-note { margin-top: 2px; color: var(--muted); font-size: 11px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+    th { color: var(--muted); font-size: 11px; font-weight: 700; }
+    tbody tr:hover { background: var(--fg-soft); }
+    .badge { display: inline-flex; align-items: center; min-height: 24px; padding: 3px 8px; border-radius: 999px; background: var(--fg-soft); color: var(--muted); font-size: 11px; font-weight: 650; }
+    .badge.success { background: oklch(94% .035 150); color: oklch(38% .09 150); }
+    .badge.warn { background: oklch(95% .05 85); color: oklch(42% .1 75); }
+    .badge.danger { background: oklch(95% .04 25); color: oklch(45% .14 25); }
+    .segmented { display: inline-flex; padding: 3px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); }
+    .segmented button { min-height: 30px; padding: 5px 10px; border: 0; border-radius: 4px; background: transparent; color: var(--muted); }
+    .segmented button.active { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px color-mix(in oklch, var(--fg) 12%, transparent); }
+    .terminal-box { min-height: 250px; max-height: 390px; overflow: auto; padding: 14px 16px; border-radius: var(--radius); background: oklch(24% .025 230); color: oklch(89% .015 220); font: 12px/1.7 var(--font-mono); }
+    .progress { height: 7px; overflow: hidden; border-radius: 99px; background: var(--border); }
+    .progress > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+    .check-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .check-row:last-child { border-bottom: 0; }
+    .check-copy strong { display: block; font-size: 13px; }
+    .check-copy span { color: var(--muted); font-size: 11px; }
+    .switch { width: 36px; height: 20px; flex: 0 0 auto; appearance: none; border-radius: 99px; background: var(--border); cursor: pointer; }
+    .switch::after { content: ''; display: block; width: 16px; height: 16px; margin: 2px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 3px color-mix(in oklch, var(--fg) 25%, transparent); transition: transform .15s ease; }
+    .switch:checked { background: var(--accent); }
+    .switch:checked::after { transform: translateX(16px); }
+    .cron-preview { padding: 20px; border-radius: var(--radius); background: oklch(24% .025 230); color: oklch(92% .015 220); text-align: center; }
+    .cron-code { font: 700 28px/1.2 var(--font-mono); letter-spacing: .04em; }
+    .muted { color: var(--muted); }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
+    .toolbar .field { min-width: 140px; flex: 1; }
+    .info-card { padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--accent-soft); color: var(--muted); font-size: 12px; }
+    .info-card strong { color: var(--fg); }
+    .button-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .editor-split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .editor-split.equal-panels { align-items: stretch; }
+    .editor-split.equal-panels > .panel { display: flex; min-height: 520px; flex-direction: column; margin-top: 0; }
+    .editor-split.equal-panels .codebox, .editor-split.equal-panels .editor-fill { flex: 1; min-height: 180px; }
+    .codebox { width: 100%; min-height: 180px; padding: 14px; resize: vertical; border: 1px solid var(--border); border-radius: var(--radius); background: oklch(24% .025 230); color: oklch(89% .015 220); font: 12px/1.65 var(--font-mono); }
+    .flow-canvas { min-height: 300px; display: grid; place-items: center; border: 1px dashed color-mix(in oklch, var(--border), var(--fg) 20%); border-radius: var(--radius); background: var(--bg); color: var(--muted); text-align: center; }
+    .flow-nodes { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; }
+    .flow-node { min-width: 110px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--fg); font-weight: 650; }
+    .flow-arrow { color: var(--muted); font-family: var(--font-mono); }
+    .modbus-top { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+    .modbus-top > .panel { min-height: 250px; margin-top: 0; }
+    .modbus-results { margin-top: 16px; }
+    .modbus-results > .panel { min-height: 210px; }
+    .modbus-top .table-wrap { max-height: 170px; overflow: auto; }
+    .modbus-detail { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); font: 12px/1.65 var(--font-mono); white-space: pre-line; }
+    .modbus-raw { padding: 10px 12px; border-radius: var(--radius); background: oklch(24% .025 230); color: oklch(80% .1 150); font: 12px/1.65 var(--font-mono); white-space: pre-wrap; }
+    .ping-overview { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+    .ping-overview > .panel { margin-top: 0; }
+    .ping-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .ping-metrics .metric { display: flex; min-height: 0; flex-direction: column; justify-content: center; }
+    .sql-condition-list { min-height: 110px; max-height: 280px; overflow: auto; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); white-space: pre-wrap; }
+    .task-banner { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+    .task-banner strong { display: block; }
+    .task-banner span { color: var(--muted); font-size: 11px; }
+    .subnav { display: flex; gap: 4px; overflow-x: auto; margin-bottom: 16px; padding: 4px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+    .subnav button { min-height: 40px; flex: 0 0 auto; padding: 7px 11px; border: 0; border-radius: 4px; background: transparent; color: var(--muted); }
+    .subnav button:hover { background: var(--fg-soft); color: var(--fg); }
+    .subnav button.active { background: var(--accent-soft); color: var(--fg); font-weight: 700; }
+    .subscreen { display: none; }
+    .subscreen.active { display: block; }
+    .detail-drawer { margin-top: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+    .drawer-head { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 8px 12px; }
+    .drawer-body { padding: 0 12px 12px; }
+    .detail-drawer.collapsed .drawer-body { display: none; }
+    .empty-state { display: grid; place-items: center; min-height: 220px; padding: 32px; border: 1px dashed var(--border); border-radius: var(--radius); background: var(--bg); text-align: center; color: var(--muted); }
+    .empty-state strong { display: block; margin-bottom: 5px; color: var(--fg); font-size: 14px; }
+    .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 50; place-items: center; padding: 20px; background: color-mix(in oklch, var(--fg) 38%, transparent); }
+    .modal-backdrop.open { display: grid; }
+    .modal { width: min(480px, 100%); padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); box-shadow: 0 18px 60px color-mix(in oklch, var(--fg) 24%, transparent); }
+    .modal p { color: var(--muted); }
+    .danger-list { margin: 12px 0 18px; padding: 12px 12px 12px 30px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); }
+    .btn-danger { color: var(--surface); background: oklch(48% .16 25); border-color: oklch(48% .16 25); }
+    .btn-danger:hover { background: oklch(42% .16 25); border-color: oklch(42% .16 25); }
+    .mobile-menu { display: none; }
+    @media (max-width: 980px) {
+      body { overflow: auto; }
+      .app { grid-template-columns: 1fr; min-height: 100%; height: auto; }
+      .sidebar { display: none; }
+      .sidebar.mobile-open { display: flex; position: fixed; inset: 0 auto 0 0; z-index: 20; width: min(86vw, 300px); box-shadow: 16px 0 40px color-mix(in oklch, var(--fg) 18%, transparent); }
+      .workspace { min-height: 100vh; grid-template-rows: auto minmax(300px, 1fr) auto; }
+      .mobile-menu { display: inline-flex; }
+      .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .fields .btn { width: 100%; }
+      .advanced { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .split { grid-template-columns: 1fr; }
+      .split.equal { grid-template-columns: 1fr; }
+      .editor-split { grid-template-columns: 1fr; }
+      .modbus-top { grid-template-columns: 1fr; }
+      .ping-overview { grid-template-columns: 1fr; }
+      .serial-layout { grid-template-columns: 1fr; }
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 620px) {
+      .page-head { padding: 16px; }
+      .config { padding: 14px 16px; }
+      .fields { grid-template-columns: 1fr; }
+      .workarea { margin: 12px 16px 0; }
+      .workbar { align-items: flex-start; flex-direction: column; }
+      .workbar-right { flex-wrap: wrap; }
+      .composer { margin: 10px 16px; }
+      .composer-body { grid-template-columns: 1fr; }
+      .send-btn { width: 100%; }
+      .advanced { grid-template-columns: 1fr; }
+      .statusbar { padding-inline: 16px; }
+      .statusbar .shortcut { display: none; }
+      .screen-content { padding: 14px 16px 20px; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" data-od-id="toolhelper-app">
+    <aside class="sidebar" data-od-id="tool-sidebar">
+      <header class="brand" data-od-id="brand-header">
+        <img class="brand-mark" src="logo.png" width="256" height="256" alt="ToolHelper 标志" />
+        <div><div class="brand-name">ToolHelper</div><div class="brand-sub">极早期调试辅助工具</div></div>
+      </header>
+      <div class="search-wrap">
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input class="input" id="tool-search" data-od-id="tool-search" placeholder="搜索工具" aria-label="搜索工具" />
+        </div>
+      </div>
+      <nav class="nav-scroll" data-od-id="tool-navigation">
+        <div class="nav-group" data-group="连接与接口"><div class="nav-label">连接与接口</div>
+          <button class="nav-item active" data-name="远程外挂连接 SSH SFTP RDP VNC" data-tool="remote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 9 4 12l4 3M12 16h5M5 5h14v14H5z"/></svg><span>远程外挂连接</span></button>
+          <button class="nav-item" data-name="数据库外挂连接 MySQL PostgreSQL" data-tool="database"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v7c0 1.7 3.1 3 7 3s7-1.3 7-3V5M5 12v7c0 1.7 3.1 3 7 3s7-1.3 7-3v-7"/></svg><span>数据库外挂连接</span></button>
+           <button class="nav-item" data-name="极早期接口验证 API MQTT" data-tool="api"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 4 3 12l5 8M16 4l5 8-5 8M14 7l-4 10"/></svg><span>极早期接口验证</span></button>
+           <button class="nav-item" data-name="获取设备 MAC 地址 ARP" data-tool="mac"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16v12H4zM8 10h2M8 14h5M17 10v4"/></svg><span>获取设备 MAC 地址</span></button>
+         </div>
+         <div class="nav-group" data-group="MQTT测试工具"><div class="nav-label">MQTT 测试工具</div>
+           <button class="nav-item" data-name="Node-RED 可视化编排 MQTT Modbus HTTP" data-tool="nodered"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="19" cy="17" r="2"/><path d="M7 12h4c3 0 3-5 6-5M11 12c3 0 3 5 6 5"/></svg><span>Node-RED 可视化编排</span></button>
+         </div>
+        <div class="nav-group" data-group="安全与运维"><div class="nav-label">安全与运维</div>
+          <button class="nav-item" data-name="Druid 漏洞检测 安全扫描" data-tool="druid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 5 6v5c0 4.6 2.9 8.1 7 10 4.1-1.9 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg><span>Druid 漏洞检测</span></button>
+          <button class="nav-item" data-name="KylinOS 运维策略 系统优化" data-tool="kylin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3"/></svg><span>KylinOS 运维策略</span></button>
+        </div>
+        <div class="nav-group" data-group="调试工具"><div class="nav-label">调试工具</div>
+          <button class="nav-item" data-name="基本串口调试 COM Modbus" data-tool="serial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4h10v5a5 5 0 0 1-10 0zM9 4V2M15 4V2M12 14v7M8 21h8"/></svg><span>基本串口调试</span></button>
+          <button class="nav-item" data-name="极早期 Modbus 调试" data-tool="modbus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16v10H4zM8 10h2M14 10h2M8 14h8"/></svg><span>极早期 Modbus 调试</span></button>
+          <button class="nav-item" data-name="群 Ping 网络检测" data-tool="ping"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h3l2-5 4 10 2-5h7"/></svg><span>群 Ping</span></button>
+           <button class="nav-item" data-name="Cron 表达式 日期" data-tool="cron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Cron 表达式</span></button>
+           <button class="nav-item" data-name="SQL 语句生成 格式化 SELECT INSERT UPDATE DELETE CREATE" data-tool="sql"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v7c0 1.7 3.1 3 7 3s7-1.3 7-3V5M9 19h6"/></svg><span>SQL 语句生成与格式化</span></button>
+           <button class="nav-item" data-name="AES 加密 解密 CBC ECB GCM" data-tool="aes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v2"/></svg><span>AES 加密/解密</span></button>
+        </div>
+        <div class="nav-empty" id="nav-empty">没有匹配的工具</div>
+      </nav>
+        <footer class="sidebar-foot"><span>13 个工具</span><span>源码完整演示</span></footer>
+    </aside>
+
+    <main class="workspace" data-od-id="tool-workspace">
+      <header class="page-head" data-od-id="page-header">
+        <div style="display:flex; gap:12px; align-items:flex-start">
+          <button class="btn btn-secondary mobile-menu" id="mobile-menu" aria-label="打开工具导航" aria-expanded="false">菜单</button>
+            <div><h1 data-od-id="page-title" id="page-title">远程外挂连接</h1><p class="lead" id="page-lead">统一管理 SSH、SFTP 与远程桌面连接，并快速返回最近使用的主机。</p></div>
+        </div>
+          <div class="head-actions"><button class="btn btn-secondary" id="page-action" data-od-id="page-action">新建主机</button></div>
+       </header>
+       <div class="screen-content">
+       <section class="screen" data-screen="serial" data-od-id="serial-debugger-screen">
+       <div class="serial-layout"><div class="serial-side"><div class="config panel" data-od-id="connection-settings">
+        <div class="section-title"><h2>连接设置</h2><span class="counter">本机串口</span></div>
+        <div class="fields">
+          <div class="field"><label for="port">串口号</label><select class="select" id="port"><option>COM3</option><option>COM5</option></select></div>
+          <div class="field"><label for="baud">波特率</label><select class="select" id="baud"><option>9600</option><option>115200</option></select></div>
+          <div class="field"><label for="data-bits">数据位</label><select class="select" id="data-bits"><option>8</option><option>7</option></select></div>
+          <div class="field"><label for="stop-bits">停止位</label><select class="select" id="stop-bits"><option>1</option><option>2</option></select></div>
+          <div class="field"><label for="parity">校验位</label><select class="select" id="parity"><option>无</option><option>偶校验</option><option>奇校验</option></select></div>
+          <button class="btn btn-primary" id="connect-btn" data-od-id="connect-serial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v6M16 3v6M6 9h12v2a6 6 0 0 1-12 0zM12 17v4"/></svg><span>打开串口</span></button>
+        </div>
+       </div>
+
+       <div class="composer" data-od-id="send-data">
+        <div class="composer-top"><h2>发送数据</h2><button class="btn btn-ghost" id="advanced-toggle" aria-expanded="false">高级选项</button></div>
+        <div class="composer-body"><textarea class="textarea" id="send-input" placeholder="输入十六进制数据，例如：01 03 00 00 00 02"></textarea><button class="btn btn-primary send-btn" id="send-btn" data-od-id="send-serial">发送</button></div>
+        <div class="advanced" id="advanced-panel">
+          <label class="check"><input type="checkbox" checked />HEX 发送</label>
+          <label class="check"><input type="checkbox" />追加回车换行</label>
+          <div class="field"><label for="checksum">校验方式</label><select class="select" id="checksum"><option>Modbus CRC16</option><option>None</option><option>CRC16-CCITT</option></select></div>
+          <div class="field"><label for="interval">定时发送间隔</label><input class="input" id="interval" value="1000 ms" /></div>
+        </div>
+       </div></div>
+
+       <div class="workarea" data-od-id="receive-log">
+        <div class="workbar">
+          <div class="workbar-left"><h2>接收日志</h2><span class="counter" id="byte-count">0 B</span></div>
+          <div class="workbar-right">
+            <label class="check"><input type="checkbox" checked />HEX 显示</label>
+            <label class="check"><input type="checkbox" checked />时间戳</label>
+            <label class="check"><input type="checkbox" checked />自动滚动</label>
+            <button class="btn btn-ghost" id="clear-log">清空日志</button>
+          </div>
+        </div>
+        <div class="terminal" id="terminal" aria-live="polite">
+          <div class="empty-log" id="empty-log"><div><strong>等待串口数据</strong>打开串口后，收发记录会显示在这里</div></div>
+        </div>
+       </div></div>
+       </section>
+
+       <section class="screen active" data-screen="remote" data-od-id="remote-connection-screen">
+          <div class="panel"><div class="panel-head"><div><h2>插件管理</h2></div><span class="badge warn">未安装</span></div><div class="button-row"><button class="btn btn-primary demo-action">下载插件</button><button class="btn btn-secondary demo-action">启动外挂</button><button class="btn btn-secondary demo-action">插件更新</button><button class="btn btn-secondary demo-action">删除插件</button><button class="btn btn-secondary demo-action">打开所在目录</button></div></div>
+          <div class="panel"><div class="panel-head"><div><h2>外挂连接</h2><p>协议切换会自动填充默认端口。</p></div></div><div class="toolbar"><div class="field"><label>协议</label><select class="select protocol-port" data-port-target="remote-port"><option data-port="22">SSH</option><option data-port="22">SFTP</option><option data-port="3389">RDP</option><option data-port="5900">VNC</option></select></div><div class="field"><label>主机</label><input class="input" placeholder="IP 或主机名" /></div><div class="field"><label>端口</label><input class="input" id="remote-port" value="22" /></div><div class="field"><label>用户名</label><input class="input" placeholder="可选" /></div><button class="btn btn-primary demo-action">外挂连接</button></div></div><div class="detail-drawer" data-od-id="remote-log-drawer"><div class="drawer-head"><strong>操作日志与诊断</strong><div class="button-row" style="margin:0"><button class="btn btn-ghost clear-box">清空</button><button class="btn btn-ghost drawer-toggle">收起日志</button></div></div><div class="drawer-body"><div class="terminal-box action-log" style="min-height:140px">[10:24:18] 视图已就绪，插件状态：未安装</div></div></div>
+       </section>
+
+       <section class="screen" data-screen="database" data-od-id="database-connection-screen">
+          <div class="panel"><div class="panel-head"><div><h2>插件管理</h2></div><span class="badge warn">未安装</span></div><div class="button-row"><button class="btn btn-primary demo-action">下载插件</button><button class="btn btn-secondary demo-action">启动外挂</button><button class="btn btn-secondary demo-action">插件更新</button><button class="btn btn-secondary demo-action">删除插件</button><button class="btn btn-secondary demo-action">打开所在目录</button></div></div><div class="panel"><div class="panel-head"><div><h2>数据库连接</h2><p>类型切换自动设置 3306 或 5432。</p></div></div><div class="grid-3"><div class="field"><label>类型</label><select class="select protocol-port" data-port-target="db-port"><option data-port="3306">MySQL</option><option data-port="5432">PostgreSQL</option></select></div><div class="field"><label>主机</label><input class="input" placeholder="IP 或主机名" /></div><div class="field"><label>端口</label><input class="input" id="db-port" value="3306" /></div><div class="field"><label>用户名</label><input class="input" /></div><div class="field"><label>密码</label><input class="input ephemeral-password" type="password" placeholder="仅本次连接" /></div><div class="field"><label>连接名称</label><input class="input" placeholder="可选" /></div><div class="field"><label>数据库</label><input class="input" placeholder="可选" /></div></div><div class="button-row" style="margin-top:12px"><button class="btn btn-primary demo-action clear-password">外挂连接</button></div></div><div class="detail-drawer" data-od-id="database-log-drawer"><div class="drawer-head"><strong>操作日志与诊断</strong><div class="button-row" style="margin:0"><button class="btn btn-ghost clear-box">清空</button><button class="btn btn-ghost drawer-toggle">收起日志</button></div></div><div class="drawer-body"><div class="terminal-box action-log" style="min-height:140px">[10:24:18] 视图已就绪，插件状态：未安装</div></div></div>
+       </section>
+
+       <section class="screen" data-screen="mac" data-od-id="device-mac-screen">
+         <div class="panel"><div class="panel-head"><div><h2>设备数据</h2><p>通过 ARP 获取同子网设备 MAC，支持 Access/JSON 存储。</p></div><span class="badge success">Access 驱动已检测</span></div><div class="button-row"><button class="btn btn-primary demo-action">新增行</button><button class="btn btn-secondary demo-action">保存</button><button class="btn btn-secondary demo-action">导出 xlsx</button><button class="btn btn-secondary demo-action">导出 docx</button><button class="btn btn-secondary demo-action">全部通信</button></div><div class="table-wrap" style="margin-top:14px"><table><thead><tr><th>序号</th><th>站名</th><th>IP 地址</th><th>设备名</th><th>设备型号</th><th>设备序列号</th><th>设备 MAC 地址</th><th>安装位置</th><th>操作</th></tr></thead><tbody id="mac-rows"><tr><td>1</td><td contenteditable="true">测试站</td><td contenteditable="true">192.168.10.24</td><td contenteditable="true">网关</td><td contenteditable="true">TH-100</td><td contenteditable="true">SN0001</td><td class="counter">尚未获取</td><td contenteditable="true">机房 A</td><td><button class="btn btn-secondary mac-fetch">通信</button></td></tr></tbody></table></div></div>
+       </section>
+
+       <section class="screen" data-screen="nodered" data-od-id="node-red-screen">
+           <div class="panel"><div class="panel-head"><div><h2>Node-RED 便携运行时</h2><p>无需预装 Node.js，按需下载并内嵌 WebView2 编辑器。</p></div><span class="badge warn">未安装</span></div><div class="button-row"><button class="btn btn-primary demo-action">下载</button><button class="btn btn-secondary demo-action">启动</button><button class="btn btn-secondary demo-action">停止</button><button class="btn btn-secondary demo-action">更新</button><button class="btn btn-secondary demo-action">删除</button><button class="btn btn-secondary demo-action">日志清理</button></div><div class="grid-2" style="margin-top:12px"><div class="field"><label>目标 IP</label><input class="input" value="127.0.0.1" /></div><div class="field"><label>端口</label><input class="input" value="1880" /></div></div></div><div class="panel"><div class="panel-head"><div><h2>流程编辑器</h2><p>串口、Modbus 与 HTTP 流程示意。</p></div><span class="badge">WebView2</span></div><div class="flow-canvas"><div><div class="flow-nodes"><div class="flow-node">串口输入</div><span class="flow-arrow">-&gt;</span><div class="flow-node">Modbus 解析</div><span class="flow-arrow">-&gt;</span><div class="flow-node">HTTP 上报</div></div><p class="muted">启动运行时后在此加载 Node-RED 编辑器</p></div></div></div><div class="detail-drawer" data-od-id="node-red-log-drawer"><div class="drawer-head"><strong>操作日志与诊断</strong><div class="button-row" style="margin:0"><button class="btn btn-ghost clear-box">清空</button><button class="btn btn-ghost drawer-toggle">收起日志</button></div></div><div class="drawer-body"><div class="terminal-box action-log" style="min-height:140px">[10:24:18] 未安装（点击下载便携包）</div></div></div>
+       </section>
+
+       <section class="screen" data-screen="api" data-od-id="api-validation-screen">
+          <div class="panel" id="api-login-panel"><div class="panel-head"><div><h2>连接与认证</h2></div></div><div class="grid-4"><div class="field"><label>服务 IP</label><input class="input" id="api-host" placeholder="例如 192.168.10.20" /></div><div class="field"><label>端口</label><input class="input" value="8080" /></div><div class="field"><label>账号</label><input class="input" id="api-user" /></div><div class="field"><label>密码</label><input class="input" id="api-pass" type="password" /></div></div><div class="button-row" style="margin-top:12px"><button class="btn btn-primary" id="api-login">登录会话</button><button class="btn btn-secondary" id="api-key-view" disabled>密钥查看</button><button class="btn btn-secondary" disabled>更换连接</button></div></div>
+          <div class="panel"><div class="panel-head"><div><h2>接口验证任务</h2></div><span class="counter" id="api-selection">已选 3 / 16</span></div><div class="button-row"><button class="btn btn-primary" id="api-run" disabled>验证所选接口</button><button class="btn btn-secondary" id="api-select">选择接口</button><button class="btn btn-secondary" disabled>获取设备 ID</button><button class="btn btn-secondary" disabled>获取 MQTT 主题</button><button class="btn btn-secondary" disabled>配置自动检测</button></div><div id="api-progress" hidden style="margin-top:14px"><div class="row-between"><span>正在验证接口 6 / 16</span><button class="btn btn-secondary" id="api-cancel">取消任务</button></div><div class="progress" style="margin-top:8px"><span style="width:38%"></span></div></div></div>
+          <div class="split equal" style="margin-top:16px"><div class="panel"><div class="panel-head"><div><h2>验证结果</h2></div><span class="badge">尚未执行</span></div><div class="empty-state panel-fill" id="api-empty"><div><strong>还没有验证结果</strong>完成登录并运行验证后，结果会按成功、失败和超时分类显示。</div></div></div><div class="panel"><div class="panel-head"><div><h2>结果详情</h2></div><span class="badge warn" id="api-auth-badge">认证状态：未登录</span></div><div class="terminal-box panel-fill" id="api-result-detail">等待选择验证结果...</div></div></div>
+       </section>
+
+       <section class="screen" data-screen="druid" data-od-id="druid-scan-screen">
+         <div class="panel"><div class="toolbar"><div class="field"><label>目标地址</label><input class="input" value="http://192.168.10.50:8080" /></div><div class="field"><label>并发数</label><select class="select"><option>5</option><option>10</option></select></div><div class="field"><label>超时</label><select class="select"><option>5 秒</option><option>10 秒</option></select></div><button class="btn btn-primary demo-action">开始检测</button></div></div><div class="grid-4" style="margin-top:16px"><div class="metric"><div class="metric-label">检测项</div><div class="metric-value">18</div><div class="metric-note">规则库 2026.08</div></div><div class="metric"><div class="metric-label">高风险</div><div class="metric-value">1</div><div class="metric-note">建议立即处理</div></div><div class="metric"><div class="metric-label">中风险</div><div class="metric-value">2</div><div class="metric-note">配置暴露</div></div><div class="metric"><div class="metric-label">安全项</div><div class="metric-value">15</div><div class="metric-note">已通过验证</div></div></div><div class="panel"><div class="panel-head"><div><h2>检测结果</h2><p>按风险等级排序，提供可操作修复建议。</p></div><button class="btn btn-secondary">导出报告</button></div><div class="table-wrap"><table><thead><tr><th>风险</th><th>检测项</th><th>路径</th><th>结果</th></tr></thead><tbody><tr><td><span class="badge danger">高风险</span></td><td>未授权访问</td><td>/druid/index.html</td><td>管理页面可直接访问</td></tr><tr><td><span class="badge warn">中风险</span></td><td>会话信息暴露</td><td>/druid/websession.json</td><td>返回有效数据</td></tr><tr><td><span class="badge warn">中风险</span></td><td>SQL 统计暴露</td><td>/druid/sql.json</td><td>返回语句摘要</td></tr><tr><td><span class="badge success">安全</span></td><td>重置接口保护</td><td>/druid/reset-all.json</td><td>访问被拒绝</td></tr></tbody></table></div></div>
+       </section>
+
+       <section class="screen" data-screen="kylin" data-od-id="kylin-policy-screen">
+         <div class="task-banner"><div><strong>当前主机：尚未连接</strong><span>可浏览 7 个二级功能；执行、部署与修复操作将在连接后启用</span></div><button class="btn btn-primary" id="kylin-connect">连接 KylinOS</button></div>
+         <div class="subnav" data-subnav="kylin"><button class="active" data-sub="activation">系统激活</button><button data-sub="reboot">定时重启</button><button data-sub="logs">日志优化</button><button data-sub="vnc">VNC Server</button><button data-sub="postgres">PostgreSQL/openGauss</button><button data-sub="vulnerability">漏洞扫描</button><button data-sub="optimization">系统优化</button></div>
+         <div class="subscreen active" data-subscreen="activation"><div class="split"><div class="panel"><div class="panel-head"><div><h2>系统激活检测</h2><p>该功能仅检测激活状态，不自动执行激活。</p></div><span class="badge">未知</span></div><div class="empty-state"><div><strong>连接后检测系统激活状态</strong>检测结果将区分已激活、未激活与无法判定，并保留原始诊断输出。</div></div></div><div class="panel"><div class="panel-head"><h2>SSH 连接参数</h2></div><div class="stack"><div class="field"><label>主机</label><input class="input" placeholder="KylinOS 测试机" /></div><div class="grid-2"><div class="field"><label>端口</label><input class="input" value="22" /></div><div class="field"><label>用户名</label><input class="input" value="root" /></div></div><div class="field"><label>密码</label><input class="input" type="password" placeholder="不会写入日志" /></div></div></div></div></div>
+         <div class="subscreen" data-subscreen="reboot"><div class="panel"><div class="panel-head"><div><h2>定时重启</h2><p>扫描 cron、脚本、sudoers 与服务共 5 项真实部署状态。</p></div><button class="btn btn-primary dangerous-action" data-action="部署定时重启" disabled>部署</button></div><div class="empty-state"><div><strong>尚未扫描部署状态</strong>连接主机并填写桌面用户后执行扫描。</div></div></div></div>
+         <div class="subscreen" data-subscreen="logs"><div class="panel"><div class="panel-head"><div><h2>日志优化</h2><p>结构化展示清理范围、保留天数和大文件截断策略。</p></div><button class="btn btn-primary dangerous-action" data-action="部署日志优化" disabled>部署</button></div><div class="grid-3"><div class="field"><label>日志保留</label><select class="select"><option>30 天</option><option>14 天</option><option>7 天</option></select></div><div class="field"><label>大文件阈值</label><input class="input" value="500 MB" /></div><div class="field"><label>执行时间</label><input class="input" value="每天 02:30" /></div></div></div></div>
+         <div class="subscreen" data-subscreen="vnc"><div class="panel"><div class="panel-head"><div><h2>VNC Server</h2><p>部署二进制、密码与服务文件，状态变化后主操作同步更新。</p></div><button class="btn btn-primary dangerous-action" data-action="部署 VNC Server" disabled>部署</button></div><div class="grid-3"><div class="field"><label>监听端口</label><input class="input" value="5900" /></div><div class="field"><label>访问密码</label><input class="input" type="password" placeholder="至少 6 位" /></div><div class="field"><label>显示编号</label><input class="input" value=":0" /></div></div></div></div>
+         <div class="subscreen" data-subscreen="postgres"><div class="panel"><div class="panel-head"><div><h2>PostgreSQL / openGauss 连接</h2><p>部署前先备份，区分 reload 与 restart 的服务影响。</p></div><button class="btn btn-primary dangerous-action" data-action="部署数据库开放配置" disabled>部署配置</button></div><div class="table-wrap"><table><thead><tr><th>检查项</th><th>路径</th><th>状态</th></tr></thead><tbody><tr><td>主配置</td><td>postgresql.conf</td><td><span class="badge">待扫描</span></td></tr><tr><td>访问控制</td><td>pg_hba.conf</td><td><span class="badge">待扫描</span></td></tr><tr><td>备份文件</td><td>*.toolhelper.bak</td><td><span class="badge">待扫描</span></td></tr></tbody></table></div></div></div>
+         <div class="subscreen" data-subscreen="vulnerability"><div class="panel"><div class="panel-head"><div><h2>系统漏洞扫描</h2><p>识别安全、易受攻击、已修复和未知状态。</p></div><button class="btn btn-primary" disabled>开始扫描</button></div><div class="empty-state"><div><strong>等待连接与补丁检测</strong>缺少本地补丁时会显示目录位置，并禁用修复操作。</div></div></div></div>
+         <div class="subscreen" data-subscreen="optimization"><div class="panel"><div class="panel-head"><div><h2>系统优化</h2><p>14 项优化按类别、风险与状态筛选，详情与变更预览分离。</p></div><button class="btn btn-primary dangerous-action" data-action="执行所选系统优化" disabled>优化所选项</button></div><div class="toolbar"><div class="field"><label>搜索</label><input class="input" placeholder="搜索优化项" /></div><div class="field"><label>风险</label><select class="select"><option>全部风险</option><option>低风险</option><option>高影响</option></select></div><div class="field"><label>状态</label><select class="select"><option>全部状态</option><option>待优化</option><option>已优化</option></select></div></div><div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>选择</th><th>优化项</th><th>类别</th><th>风险</th><th>状态</th></tr></thead><tbody><tr><td><input type="checkbox" checked /></td><td>关闭无用打印服务</td><td>服务</td><td><span class="badge success">低风险</span></td><td>待扫描</td></tr><tr><td><input type="checkbox" /></td><td>Mask 高影响系统服务</td><td>服务</td><td><span class="badge danger">高影响</span></td><td>待扫描</td></tr></tbody></table></div></div></div>
+          <div class="detail-drawer" id="kylin-log"><div class="drawer-head"><strong>操作日志与诊断</strong><button class="btn btn-ghost drawer-toggle">收起日志</button></div><div class="drawer-body"><div class="terminal-box" style="min-height:140px">[10:24:18] 当前未连接，执行操作已安全禁用</div></div></div>
+       </section>
+
+       <section class="screen" data-screen="modbus" data-od-id="modbus-debugger-screen">
+          <div class="modbus-top"><div class="panel"><div class="panel-head"><div><h2>串口与协议</h2><p>支持申弘版与南瑞怡和版 Modbus RTU。</p></div><span class="badge" id="modbus-status">串口未打开</span></div><div class="grid-2"><div class="field"><label>协议</label><select class="select" id="modbus-protocol"><option>申弘版</option><option>南瑞怡和版</option></select></div><div class="field"><label>串口号</label><select class="select" id="modbus-port"><option>COM3</option><option>COM5</option></select></div><div class="field"><label>波特率</label><select class="select" id="modbus-baud"><option>9600</option><option>1200</option><option>2400</option><option>4800</option><option>19200</option><option>38400</option><option>57600</option><option>115200</option></select></div><div class="field"><label>设备地址</label><input class="input" id="modbus-address" value="1" inputmode="numeric" /></div></div><div class="button-row" style="margin-top:12px"><button class="btn btn-primary" id="modbus-open">打开串口</button><button class="btn btn-secondary" id="modbus-close" disabled>关闭串口</button><button class="btn btn-secondary" id="modbus-refresh">刷新</button><button class="btn btn-secondary modbus-operation" id="modbus-scan" disabled>扫描设备</button><button class="btn btn-secondary modbus-operation" id="modbus-read" disabled>读取当前设备</button><button class="btn btn-secondary modbus-operation" id="modbus-poll" disabled>开始轮询</button><button class="btn btn-secondary modbus-operation" id="modbus-reset" hidden disabled>复位（南瑞怡和）</button></div></div><div class="panel"><div class="panel-head"><h2>设备列表</h2><span class="counter" id="modbus-count">0 台设备</span></div><div class="table-wrap"><table><thead><tr><th>地址</th><th>序列号</th><th>在线</th></tr></thead><tbody id="modbus-devices"><tr><td colspan="3" class="muted">打开串口后扫描站端下辖设备</td></tr></tbody></table></div></div></div><div class="modbus-results"><div class="panel"><div class="panel-head"><h2>解析结果（当前选中设备详情）</h2></div><div class="modbus-detail" id="modbus-detail">（未选中设备）</div></div><div class="detail-drawer collapsed" data-od-id="modbus-raw-drawer"><div class="drawer-head"><strong>原始报文</strong><div class="button-row"><button class="btn btn-ghost" id="modbus-clear">清空</button><button class="btn btn-ghost drawer-toggle">展开报文</button></div></div><div class="drawer-body"><div class="modbus-raw" id="modbus-raw">等待 Modbus RTU 通信...</div></div></div></div>
+       </section>
+
+        <section class="screen" data-screen="ping" data-od-id="group-ping-screen">
+           <div class="ping-overview" data-od-id="ping-overview"><div class="panel" data-od-id="ping-target-controls"><div class="panel-head"><div><h2>目标与检测</h2><p>支持 CIDR 网段、末段范围和文本目标列表。</p></div><span class="badge" id="ping-status">等待目标</span></div><div class="toolbar"><div class="field" style="flex:2"><label>网段或范围</label><input class="input" id="ping-target" placeholder="192.168.1.0/24 或 192.168.1.1-254" /></div><button class="btn btn-secondary" id="ping-scan">扫描网段</button><button class="btn btn-secondary" id="ping-import">导入文件</button><div class="field"><label>并发数</label><input class="input" id="ping-concurrency" value="50" /></div><div class="field"><label>每目标次数</label><input class="input" id="ping-count" value="4" /></div><div class="field"><label>超时（ms）</label><input class="input" id="ping-timeout" value="1000" /></div></div><div class="button-row" style="margin-top:12px"><button class="btn btn-primary" id="ping-start">开始 Ping</button><button class="btn btn-secondary" id="ping-stop" disabled>停止</button><button class="btn btn-secondary" id="ping-clear">清空</button><button class="btn btn-secondary">导出 CSV</button><button class="btn btn-secondary">导出 Excel</button></div></div><div class="ping-metrics" data-od-id="ping-summary-metrics"><div class="metric" data-od-id="ping-metric-total"><div class="metric-label">目标总数</div><div class="metric-value" id="ping-total">0</div></div><div class="metric" data-od-id="ping-metric-online"><div class="metric-label">在线</div><div class="metric-value" id="ping-online">0</div></div><div class="metric" data-od-id="ping-metric-offline"><div class="metric-label">离线</div><div class="metric-value" id="ping-offline">0</div></div><div class="metric" data-od-id="ping-metric-average"><div class="metric-label">平均延迟</div><div class="metric-value" id="ping-average">0 ms</div></div></div></div><div class="panel"><div class="panel-head"><div><h2>检测结果</h2><p>逐目标展示状态、平均延迟和丢包率。</p></div><span class="counter" id="ping-progress">尚未检测</span></div><div class="table-wrap"><table><thead><tr><th>目标</th><th>状态</th><th>平均延迟（ms）</th><th>丢包率</th></tr></thead><tbody id="ping-results"><tr><td colspan="4" class="muted">请先扫描网段或导入文件</td></tr></tbody></table></div></div>
+       </section>
+
+       <section class="screen" data-screen="cron" data-od-id="cron-expression-screen">
+         <div class="split"><div class="panel"><div class="panel-head"><div><h2>表达式编辑器</h2><p>通过字段选择生成并校验 Cron 表达式。</p></div></div><div class="grid-2"><div class="field"><label>秒</label><select class="select cron-field"><option>0</option><option>*</option></select></div><div class="field"><label>分</label><select class="select cron-field"><option>0</option><option>*/5</option><option>30</option></select></div><div class="field"><label>时</label><select class="select cron-field"><option>9</option><option>*</option><option>18</option></select></div><div class="field"><label>日</label><select class="select cron-field"><option>*</option><option>1</option><option>15</option></select></div><div class="field"><label>月</label><select class="select cron-field"><option>*</option><option>1-12</option></select></div><div class="field"><label>星期</label><select class="select cron-field"><option>1-5</option><option>*</option><option>1</option></select></div></div><div class="cron-preview" style="margin-top:16px"><div class="cron-code" id="cron-code">0 0 9 * * 1-5</div><div style="margin-top:8px">每个工作日上午 09:00 执行</div></div></div><div class="panel"><div class="panel-head"><div><h2>未来执行时间</h2><p>按本机时区 UTC+08:00 计算。</p></div><span class="badge success">表达式有效</span></div><div class="check-row"><div class="check-copy"><strong>第 1 次</strong><span>2026 年 9 月 2 日，星期三</span></div><span class="counter">09:00:00</span></div><div class="check-row"><div class="check-copy"><strong>第 2 次</strong><span>2026 年 9 月 3 日，星期四</span></div><span class="counter">09:00:00</span></div><div class="check-row"><div class="check-copy"><strong>第 3 次</strong><span>2026 年 9 月 4 日，星期五</span></div><span class="counter">09:00:00</span></div><div class="check-row"><div class="check-copy"><strong>第 4 次</strong><span>2026 年 9 月 7 日，星期一</span></div><span class="counter">09:00:00</span></div></div></div>
+       </section>
+
+       <section class="screen" data-screen="sql" data-od-id="sql-tool-screen">
+          <div class="editor-split equal-panels"><div class="panel"><div class="panel-head"><div><h2>SQL 生成器</h2><p>支持 SELECT / INSERT / UPDATE / DELETE / CREATE。</p></div></div><div class="segmented sql-modes"><button class="active">SELECT</button><button>INSERT</button><button>UPDATE</button><button>DELETE</button><button>CREATE</button></div><div class="grid-2" style="margin-top:12px"><div class="field"><label>表名</label><input class="input" id="sql-table" value="employees" /></div><div class="field"><label>LIMIT</label><input class="input" id="sql-limit" value="100" /></div><div class="field"><label>查询列</label><input class="input" id="sql-columns" value="id, name, department" /></div><div class="field"><label>排序字段</label><input class="input" id="sql-order" value="id" /></div></div><div class="button-row" style="margin-top:12px"><button class="btn btn-primary" id="generate-sql">生成 SQL</button><button class="btn btn-secondary" id="sql-add-condition">添加条件</button><button class="btn btn-secondary" id="sql-view-conditions">查看条件</button><button class="btn btn-secondary">复制</button><button class="btn btn-secondary">清空</button></div><textarea class="codebox" id="sql-generated" readonly style="margin-top:12px">SELECT id, name, department
+FROM employees
+ORDER BY id ASC
+LIMIT 100;</textarea></div><div class="panel"><div class="panel-head"><div><h2>SQL 格式化</h2><p>加载、格式化、复制或下载 SQL 文件。</p></div><button class="btn btn-secondary">加载文件</button></div><textarea class="textarea" id="sql-format-input" style="min-height:140px">select id,name from employees where department='研发部' order by id desc;</textarea><div class="button-row" style="margin:12px 0"><button class="btn btn-primary" id="format-sql">格式化</button><button class="btn btn-secondary">复制输入</button><button class="btn btn-secondary">复制输出</button><button class="btn btn-secondary">下载</button><button class="btn btn-secondary">重置所有</button></div><textarea class="codebox" id="sql-format-output" readonly>SELECT id, name
+FROM employees
+WHERE department = '研发部'
+ORDER BY id DESC;</textarea></div></div>
+       </section>
+
+       <section class="screen" data-screen="aes" data-od-id="aes-tool-screen">
+          <div class="panel"><div class="panel-head"><div><h2>AES 参数</h2><p>支持多种运算模式、填充、密钥长度、编码和输出格式。</p></div><span class="badge">本地运算</span></div><div class="grid-4"><div class="field"><label>运算模式</label><select class="select" id="aes-mode"><option>CBC</option><option>ECB</option><option>OFB</option><option>CFB</option><option>CTS</option><option>CTR</option><option>GCM</option></select></div><div class="field"><label>填充模式</label><select class="select"><option>PKCS7</option><option>无</option><option>零填充</option><option>ANSIX923</option><option>ISO10126</option></select></div><div class="field"><label>密钥长度</label><select class="select"><option>256 位</option><option>192 位</option><option>128 位</option></select></div><div class="field"><label>字符编码</label><select class="select"><option>UTF-8</option><option>UTF-16</option><option>UTF-32</option><option>ASCII</option><option>GBK</option><option>ISO-8859-1</option></select></div><div class="field"><label>输出格式</label><select class="select"><option>Base64</option><option>十六进制</option></select></div><div class="field"><label>密钥格式</label><select class="select"><option>文本</option><option>十六进制</option></select></div><div class="field"><label>IV 格式</label><select class="select"><option>文本</option><option>十六进制</option></select></div></div><div class="grid-2" style="margin-top:12px"><div class="field"><label>密钥</label><input class="input" id="aes-key" placeholder="输入密钥 KEY" /></div><div class="field" id="aes-iv-field"><label>偏移量 IV</label><input class="input" id="aes-iv" placeholder="输入偏移量 IV" /></div></div></div><div class="editor-split equal-panels" style="margin-top:16px"><div class="panel"><div class="panel-head"><h2>输入</h2></div><textarea class="textarea editor-fill" id="aes-input" placeholder="加密时输入明文，解密时输入密文"></textarea></div><div class="panel"><div class="panel-head"><h2>输出结果</h2><button class="btn btn-ghost" id="aes-output-clear">清空</button></div><textarea class="codebox editor-fill" id="aes-output" readonly></textarea></div></div><div class="button-row" style="margin-top:16px"><button class="btn btn-primary aes-action" data-action="加密">加密</button><button class="btn btn-secondary aes-action" data-action="解密">解密</button><button class="btn btn-secondary" id="aes-clear">清空</button></div>
+       </section>
+       </div>
+
+       <footer class="statusbar" data-od-id="status-bar"><div class="status" id="status"><span class="status-dot"></span><span id="status-text">未连接，参数可编辑</span></div><span class="shortcut">Ctrl + Enter 发送</span></footer>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="danger-modal" role="dialog" aria-modal="true" aria-labelledby="danger-title"><div class="modal"><h2 id="danger-title">确认危险操作</h2><p id="danger-copy">请确认目标、影响与恢复方式。</p><ul class="danger-list"><li>目标主机：root@192.168.10.20:22</li><li>操作将在远程系统写入配置并重启相关服务</li><li>执行前应已创建可恢复快照</li></ul><div class="button-row"><button class="btn btn-danger" id="danger-confirm">确认执行</button><button class="btn btn-secondary" id="danger-cancel">取消</button></div></div></div>
+  <div class="modal-backdrop" id="sql-condition-modal" role="dialog" aria-modal="true" aria-labelledby="sql-condition-title"><div class="modal"><h2 id="sql-condition-title">添加查询条件</h2><div class="grid-3" style="margin-top:16px"><div class="field"><label for="sql-condition-field">字段名</label><input class="input" id="sql-condition-field" placeholder="例如 department" /></div><div class="field"><label for="sql-condition-op">运算符</label><select class="select" id="sql-condition-op"><option>=</option><option>!=</option><option>&gt;</option><option>&lt;</option><option>&gt;=</option><option>&lt;=</option><option>LIKE</option><option>NOT LIKE</option></select></div><div class="field"><label for="sql-condition-value">值</label><input class="input" id="sql-condition-value" placeholder="例如 研发部" /></div></div><div class="button-row" style="margin-top:18px"><button class="btn btn-primary" id="sql-condition-save">添加</button><button class="btn btn-secondary" id="sql-condition-cancel">取消</button></div></div></div>
+  <div class="modal-backdrop" id="sql-condition-view-modal" role="dialog" aria-modal="true" aria-labelledby="sql-condition-view-title"><div class="modal"><h2 id="sql-condition-view-title">已添加条件</h2><div class="sql-condition-list" id="sql-condition-list" style="margin-top:16px">尚未添加条件</div><div class="button-row" style="margin-top:18px"><button class="btn btn-secondary" id="sql-condition-view-close">关闭</button></div></div></div>
+  <script>
+    const search = document.getElementById('tool-search');
+    const navItems = [...document.querySelectorAll('.nav-item')];
+    const navGroups = [...document.querySelectorAll('.nav-group')];
+    search.addEventListener('input', () => {
+      const query = search.value.trim().toLowerCase();
+      let visible = 0;
+      navItems.forEach(item => { const show = item.dataset.name.toLowerCase().includes(query); item.hidden = !show; if (show) visible++; });
+      navGroups.forEach(group => { group.hidden = ![...group.querySelectorAll('.nav-item')].some(item => !item.hidden); });
+      document.getElementById('nav-empty').style.display = visible ? 'none' : 'block';
+    });
+    const screens = [...document.querySelectorAll('.screen')];
+    const pageMeta = {
+      serial: ['基本串口调试', '配置串口并以文本或十六进制收发数据，连接参数与日志状态清晰分区。', '刷新串口'],
+      remote: ['远程外挂连接', '统一管理 SSH、SFTP 与远程桌面连接，并快速返回最近使用的主机。', '新建主机'],
+      database: ['数据库外挂连接', '集中配置数据库连接，并通过分步诊断快速定位连接问题。', '导入配置'],
+      api: ['极早期接口验证', '在开发早期构造请求、检查响应并保存常用接口。', '保存请求'],
+      mac: ['获取设备 MAC 地址', '通过 ARP 获取同子网设备 MAC 地址，并保存或导出设备台账。', '验证驱动'],
+      nodered: ['Node-RED 可视化编排', '管理便携运行时，在内嵌编辑器中编排串口、Modbus 与 HTTP 流程。', '刷新状态'],
+      druid: ['Druid 漏洞检测', '扫描常见暴露路径，按风险等级汇总结果与修复方向。', '更新规则'],
+      kylin: ['KylinOS 运维策略', '以合规率和变更影响为线索，批量管理系统优化策略。', '刷新状态'],
+      modbus: ['极早期 Modbus 调试', '连接 Modbus 设备，读取寄存器并核对原始协议值。', '扫描设备'],
+      ping: ['群 Ping', '批量检测网段可达性、延迟与丢包，快速聚焦异常主机。', '导入目标'],
+      cron: ['Cron 表达式', '可视化生成表达式并预览未来执行时间，降低配置错误。', '复制表达式'],
+      sql: ['SQL 语句生成与格式化', '同屏完成可视化 SQL 生成、语法格式化、复制与下载。', '加载 SQL'],
+      aes: ['AES 加密/解密', '配置 AES 模式、填充、密钥长度与编码，在本机完成加密和解密。', '重置参数']
+    };
+    function showScreen(tool) {
+      screens.forEach(screen => screen.classList.toggle('active', screen.dataset.screen === tool));
+      const meta = pageMeta[tool];
+      document.getElementById('page-title').textContent = meta[0];
+      document.getElementById('page-lead').textContent = meta[1];
+      document.getElementById('page-action').textContent = meta[2];
+      status.className = 'status';
+      statusText.textContent = `${meta[0]} 已就绪`;
+      document.querySelector('.screen-content').scrollTop = 0;
+    }
+    navItems.forEach(item => item.addEventListener('click', () => {
+      navItems.forEach(node => node.classList.remove('active'));
+      item.classList.add('active');
+      showScreen(item.dataset.tool);
+    }));
+    const connectBtn = document.getElementById('connect-btn');
+    const status = document.getElementById('status');
+    const statusText = document.getElementById('status-text');
+    let connected = false;
+    connectBtn.addEventListener('click', () => {
+      connected = !connected;
+      document.querySelectorAll('.config select').forEach(control => control.disabled = connected);
+      status.classList.toggle('connected', connected);
+      status.classList.remove('error');
+      connectBtn.querySelector('span').textContent = connected ? '关闭串口' : '打开串口';
+      statusText.textContent = connected ? `已连接 ${document.getElementById('port').value} @ ${document.getElementById('baud').value} bps` : '已断开，参数可编辑';
+      if (connected) appendLog('sys', '串口连接已建立');
+    });
+    document.getElementById('page-action').addEventListener('click', event => { statusText.textContent = `${event.currentTarget.textContent}操作已完成`; });
+    document.getElementById('advanced-toggle').addEventListener('click', event => {
+      const panel = document.getElementById('advanced-panel'); const open = panel.classList.toggle('open');
+      event.currentTarget.setAttribute('aria-expanded', open); event.currentTarget.textContent = open ? '收起高级选项' : '高级选项';
+    });
+    const terminal = document.getElementById('terminal');
+    function appendLog(type, message) {
+      document.getElementById('empty-log')?.remove();
+      const line = document.createElement('div'); line.className = 'log-line';
+      const now = new Date().toLocaleTimeString('zh-CN', { hour12: false }) + '.' + String(new Date().getMilliseconds()).padStart(3, '0');
+      const label = type === 'tx' ? '发送' : type === 'rx' ? '接收' : '系统';
+      const time = document.createElement('span'); time.className = 'log-time'; time.textContent = `[${now}] `;
+      const direction = document.createElement('span'); direction.className = type === 'tx' ? 'log-tx' : 'log-rx'; direction.textContent = label;
+      line.append(time, direction, document.createTextNode(`  ${message}`));
+      terminal.appendChild(line); terminal.scrollTop = terminal.scrollHeight;
+    }
+    function sendData() {
+      const input = document.getElementById('send-input'); const value = input.value.trim();
+      if (!connected) { status.classList.add('error'); statusText.textContent = '请先打开串口'; connectBtn.focus(); return; }
+      if (!value) { status.classList.add('error'); statusText.textContent = '请输入要发送的数据'; input.focus(); return; }
+      status.classList.remove('error'); appendLog('tx', `${value}  (${value.split(/\s+/).length} B)`); document.getElementById('byte-count').textContent = `${value.split(/\s+/).length} B`;
+      statusText.textContent = '发送完成'; setTimeout(() => appendLog('rx', '01 03 04 00 19 00 2A  EA 3B  (9 B)'), 320);
+    }
+    document.getElementById('send-btn').addEventListener('click', sendData);
+    document.getElementById('send-input').addEventListener('keydown', event => { if (event.ctrlKey && event.key === 'Enter') { event.preventDefault(); sendData(); } });
+    document.getElementById('clear-log').addEventListener('click', () => { terminal.innerHTML = '<div class="empty-log" id="empty-log"><div><strong>日志已清空</strong>新的收发记录会显示在这里</div></div>'; document.getElementById('byte-count').textContent = '0 B'; statusText.textContent = '日志已清空'; });
+    document.querySelectorAll('.segmented').forEach(group => group.addEventListener('click', event => {
+      if (event.target.tagName !== 'BUTTON') return;
+      group.querySelectorAll('button').forEach(button => button.classList.toggle('active', button === event.target));
+    }));
+    document.querySelectorAll('.demo-action').forEach(button => button.addEventListener('click', () => {
+      status.className = 'status connected';
+      statusText.textContent = `${button.textContent.trim()}成功`;
+      const log = button.closest('.screen')?.querySelector('.action-log');
+      if (log) log.textContent += `\n[${new Date().toLocaleTimeString('zh-CN', {hour12:false})}] ${button.textContent.trim()}操作已执行`;
+    }));
+    document.querySelectorAll('.protocol-port').forEach(select => select.addEventListener('change', () => {
+      document.getElementById(select.dataset.portTarget).value = select.selectedOptions[0].dataset.port;
+    }));
+    document.querySelectorAll('.clear-box').forEach(button => button.addEventListener('click', () => {
+      const box = button.closest('.panel, .detail-drawer').querySelector('.action-log'); box.textContent = ''; statusText.textContent = '操作日志已清空';
+    }));
+    document.querySelector('.clear-password')?.addEventListener('click', () => { document.querySelector('.ephemeral-password').value = ''; });
+    document.getElementById('mac-rows').addEventListener('click', event => {
+      if (!event.target.classList.contains('mac-fetch')) return;
+      const cells = event.target.closest('tr').children; cells[6].textContent = '00:E0:B4:69:6D:C1'; statusText.textContent = `获取成功：${cells[2].textContent} -> ${cells[6].textContent}`;
+    });
+    document.getElementById('generate-sql').addEventListener('click', () => {
+      const mode = document.querySelector('.sql-modes .active').textContent; const table = document.getElementById('sql-table').value || 'table_name'; const cols = document.getElementById('sql-columns').value || '*';
+      const where = sqlConditions.length ? `\nWHERE ${sqlConditions.map(condition => `${condition.field} ${condition.op} '${condition.value.replaceAll("'", "''")}'`).join(' AND ')}` : '';
+      document.getElementById('sql-generated').value = mode === 'SELECT' ? `SELECT ${cols}\nFROM ${table}${where}\nORDER BY ${document.getElementById('sql-order').value || 'id'} ASC\nLIMIT ${document.getElementById('sql-limit').value || '100'};` : `${mode} ${table}\n-- 请继续填写当前模式字段`;
+      statusText.textContent = 'SQL 生成成功';
+    });
+    const sqlConditions = [];
+    const sqlConditionModal = document.getElementById('sql-condition-modal');
+    const sqlConditionViewModal = document.getElementById('sql-condition-view-modal');
+    document.getElementById('sql-add-condition').addEventListener('click', () => { sqlConditionModal.classList.add('open'); document.getElementById('sql-condition-field').focus(); });
+    document.getElementById('sql-condition-cancel').addEventListener('click', () => sqlConditionModal.classList.remove('open'));
+    document.getElementById('sql-condition-save').addEventListener('click', () => {
+      const field = document.getElementById('sql-condition-field'); const value = document.getElementById('sql-condition-value');
+      if (!field.value.trim() || !value.value.trim()) { status.className = 'status error'; statusText.textContent = '请填写条件字段和值'; (!field.value.trim() ? field : value).focus(); return; }
+      sqlConditions.push({ field: field.value.trim(), op: document.getElementById('sql-condition-op').value, value: value.value.trim() });
+      field.value = ''; value.value = ''; sqlConditionModal.classList.remove('open'); status.className = 'status connected'; statusText.textContent = `已添加 ${sqlConditions.length} 个查询条件`;
+    });
+    document.getElementById('sql-view-conditions').addEventListener('click', () => {
+      document.getElementById('sql-condition-list').textContent = sqlConditions.length ? sqlConditions.map((condition, index) => `${index + 1}. ${condition.field} ${condition.op} ${condition.value}`).join('\n') : '尚未添加条件';
+      sqlConditionViewModal.classList.add('open'); document.getElementById('sql-condition-view-close').focus();
+    });
+    document.getElementById('sql-condition-view-close').addEventListener('click', () => sqlConditionViewModal.classList.remove('open'));
+    document.getElementById('format-sql').addEventListener('click', () => {
+      const value = document.getElementById('sql-format-input').value.trim();
+      document.getElementById('sql-format-output').value = value.replace(/\b(select|from|where|order by|group by|limit|insert|update|delete|create|set|values)\b/gi, word => word.toUpperCase()).replace(/\s+(FROM|WHERE|ORDER BY|GROUP BY|LIMIT|SET|VALUES)\b/g, '\n$1');
+      statusText.textContent = '格式化成功，关键字已大写';
+    });
+    const aesMode = document.getElementById('aes-mode');
+    aesMode.addEventListener('change', () => { const disabled = aesMode.value === 'ECB'; document.getElementById('aes-iv').disabled = disabled; document.getElementById('aes-iv-field').style.opacity = disabled ? '.5' : '1'; });
+    document.querySelectorAll('.aes-action').forEach(button => button.addEventListener('click', () => {
+      const input = document.getElementById('aes-input').value.trim(); const key = document.getElementById('aes-key').value.trim();
+      if (!input || !key) { status.className = 'status error'; statusText.textContent = '请输入密钥和待处理内容'; return; }
+      document.getElementById('aes-output').value = button.dataset.action === '加密' ? btoa(unescape(encodeURIComponent(input))) : '演示模式：请输入有效 Base64 密文'; status.className = 'status connected'; statusText.textContent = `${button.dataset.action}成功 | 模式：${aesMode.value}`;
+    }));
+    document.getElementById('aes-clear').addEventListener('click', () => { ['aes-key','aes-iv','aes-input','aes-output'].forEach(id => document.getElementById(id).value = ''); statusText.textContent = 'AES 输入已清空'; });
+    document.getElementById('aes-output-clear').addEventListener('click', () => { document.getElementById('aes-output').value = ''; statusText.textContent = 'AES 输出结果已清空'; });
+    document.querySelectorAll('[data-subnav]').forEach(nav => nav.addEventListener('click', event => {
+      const button = event.target.closest('button[data-sub]'); if (!button) return;
+      nav.querySelectorAll('button').forEach(item => item.classList.toggle('active', item === button));
+      nav.parentElement.querySelectorAll('.subscreen').forEach(screen => screen.classList.toggle('active', screen.dataset.subscreen === button.dataset.sub));
+      statusText.textContent = `已切换到${button.textContent}`;
+    }));
+    document.querySelectorAll('.drawer-toggle').forEach(button => button.addEventListener('click', () => {
+      const drawer = button.closest('.detail-drawer'); const collapsed = drawer.classList.toggle('collapsed'); const isRaw = drawer.dataset.odId === 'modbus-raw-drawer'; button.textContent = collapsed ? (isRaw ? '展开报文' : '展开日志') : (isRaw ? '收起报文' : '收起日志');
+    }));
+    document.getElementById('kylin-connect').addEventListener('click', event => {
+      const connectedNow = event.currentTarget.textContent.includes('连接 KylinOS');
+      event.currentTarget.textContent = connectedNow ? '断开连接' : '连接 KylinOS';
+      document.querySelector('[data-screen="kylin"] .task-banner strong').textContent = connectedNow ? '当前主机：root@192.168.10.20:22' : '当前主机：尚未连接';
+      document.querySelectorAll('[data-screen="kylin"] button[disabled]').forEach(button => button.disabled = !connectedNow);
+      status.className = connectedNow ? 'status connected' : 'status'; statusText.textContent = connectedNow ? 'KylinOS 连接成功，功能操作已启用' : 'KylinOS 已断开，危险操作已禁用';
+    });
+    const dangerModal = document.getElementById('danger-modal'); let pendingDanger = '';
+    document.querySelectorAll('.dangerous-action').forEach(button => button.addEventListener('click', () => { pendingDanger = button.dataset.action; document.getElementById('danger-copy').textContent = `即将${pendingDanger}。此操作可能修改远程系统配置，请核对影响。`; dangerModal.classList.add('open'); document.getElementById('danger-cancel').focus(); }));
+    document.getElementById('danger-cancel').addEventListener('click', () => { dangerModal.classList.remove('open'); statusText.textContent = '已取消危险操作，未做任何更改'; });
+    document.getElementById('danger-confirm').addEventListener('click', () => { dangerModal.classList.remove('open'); status.className = 'status connected'; statusText.textContent = `${pendingDanger}已进入执行队列`; });
+    const apiLogin = document.getElementById('api-login');
+    apiLogin.addEventListener('click', () => {
+      const host = document.getElementById('api-host'); const user = document.getElementById('api-user'); const pass = document.getElementById('api-pass');
+      if (!host.value.trim() || !user.value.trim() || !pass.value) { status.className = 'status error'; statusText.textContent = '请完整填写服务 IP、账号和密码'; (!host.value.trim() ? host : !user.value.trim() ? user : pass).focus(); return; }
+      document.getElementById('api-auth-badge').className = 'badge success'; document.getElementById('api-auth-badge').textContent = '认证状态：会话有效';
+      document.querySelectorAll('[data-screen="api"] button[disabled]').forEach(button => button.disabled = false); pass.value = ''; status.className = 'status connected'; statusText.textContent = '登录成功，Token 已安全保存在当前会话';
+    });
+    document.getElementById('api-key-view').addEventListener('click', () => {
+      document.getElementById('api-result-detail').textContent = '认证状态：会话有效\n密钥标识：••••••••••••7F2A\n有效范围：当前会话';
+      statusText.textContent = '密钥信息已在结果详情中展示';
+    });
+    document.getElementById('api-run').addEventListener('click', () => { document.getElementById('api-progress').hidden = false; statusText.textContent = '正在验证所选接口，可随时取消'; });
+    document.getElementById('api-cancel').addEventListener('click', () => { document.getElementById('api-progress').hidden = true; statusText.textContent = '任务已取消，已完成结果将保留'; });
+    const modbusProtocol = document.getElementById('modbus-protocol');
+    const modbusOpen = document.getElementById('modbus-open');
+    const modbusClose = document.getElementById('modbus-close');
+    const modbusStatus = document.getElementById('modbus-status');
+    const modbusRaw = document.getElementById('modbus-raw');
+    const modbusOperations = [...document.querySelectorAll('.modbus-operation')];
+    let modbusConnected = false;
+    let modbusPolling = false;
+    function appendModbusRaw(message) {
+      if (modbusRaw.textContent === '等待 Modbus RTU 通信...') modbusRaw.textContent = '';
+      modbusRaw.textContent += `${modbusRaw.textContent ? '\n' : ''}[${new Date().toLocaleTimeString('zh-CN', {hour12:false})}] ${message}`;
+      modbusRaw.scrollTop = modbusRaw.scrollHeight;
+    }
+    function setModbusConnection(open) {
+      modbusConnected = open;
+      modbusOpen.disabled = open;
+      modbusClose.disabled = !open;
+      modbusOperations.forEach(button => button.disabled = !open);
+      ['modbus-protocol', 'modbus-port', 'modbus-baud'].forEach(id => document.getElementById(id).disabled = open);
+      modbusStatus.className = open ? 'badge success' : 'badge';
+      modbusStatus.textContent = open ? `已连接 ${document.getElementById('modbus-port').value} @ ${document.getElementById('modbus-baud').value} bps 8N1` : '串口未打开';
+      status.className = open ? 'status connected' : 'status';
+      statusText.textContent = open ? 'Modbus RTU 串口已打开' : 'Modbus RTU 串口已关闭';
+      appendModbusRaw(open ? '串口连接已建立' : '串口连接已关闭');
+    }
+    modbusProtocol.addEventListener('change', () => {
+      document.getElementById('modbus-reset').hidden = modbusProtocol.value !== '南瑞怡和版';
+      statusText.textContent = `已切换到${modbusProtocol.value}`;
+    });
+    modbusOpen.addEventListener('click', () => setModbusConnection(true));
+    modbusClose.addEventListener('click', () => {
+      modbusPolling = false;
+      document.getElementById('modbus-poll').textContent = '开始轮询';
+      setModbusConnection(false);
+    });
+    document.getElementById('modbus-refresh').addEventListener('click', () => { statusText.textContent = '串口列表已刷新'; });
+    document.getElementById('modbus-scan').addEventListener('click', () => {
+      appendModbusRaw('―― 扫描设备 ――\n发→ 00 03 00 00 00 10 45 D4');
+      document.getElementById('modbus-count').textContent = '等待设备响应';
+      statusText.textContent = '正在扫描站端下辖设备';
+    });
+    document.getElementById('modbus-read').addEventListener('click', () => {
+      const address = document.getElementById('modbus-address').value.trim();
+      if (!/^(?:[1-9]|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])$/.test(address)) { status.className = 'status error'; statusText.textContent = '设备地址无效（1-255）'; document.getElementById('modbus-address').focus(); return; }
+      const request = modbusProtocol.value === '申弘版' ? `${Number(address).toString(16).padStart(2, '0')} 03 00 10 00 16` : `${Number(address).toString(16).padStart(2, '0')} 04 00 01 00 1C`;
+      appendModbusRaw(`―― 读取设备 ${address} ――\n发→ ${request.toUpperCase()} [CRC]`);
+      document.getElementById('modbus-detail').textContent = `设备地址: ${address}\n等待设备响应与中文解析...`;
+      statusText.textContent = `正在读取设备 ${address}`;
+    });
+    document.getElementById('modbus-poll').addEventListener('click', event => {
+      modbusPolling = !modbusPolling;
+      event.currentTarget.textContent = modbusPolling ? '停止轮询' : '开始轮询';
+      appendModbusRaw(modbusPolling ? '―― 开始轮询 ――' : '―― 停止轮询 ――');
+      statusText.textContent = modbusPolling ? '轮询已启动，等待设备响应' : '轮询已停止';
+    });
+    document.getElementById('modbus-reset').addEventListener('click', () => {
+      const address = document.getElementById('modbus-address').value.trim();
+      appendModbusRaw(`―― 请求复位设备 ${address} ――\n发→ ${Number(address || 1).toString(16).padStart(2, '0').toUpperCase()} 05 00 07 FF 00 [CRC]`);
+      statusText.textContent = `已向设备 ${address || 1} 发送复位请求`;
+    });
+    document.getElementById('modbus-clear').addEventListener('click', () => { modbusRaw.textContent = '等待 Modbus RTU 通信...'; statusText.textContent = 'Modbus 原始报文已清空'; });
+    const pingTarget = document.getElementById('ping-target');
+    const pingStatus = document.getElementById('ping-status');
+    const pingStart = document.getElementById('ping-start');
+    const pingStop = document.getElementById('ping-stop');
+    let pingTargetCount = 0;
+    function setPingTargets() {
+      const value = pingTarget.value.trim();
+      if (!value) { status.className = 'status error'; statusText.textContent = '请输入网段或目标范围'; pingTarget.focus(); return; }
+      const range = value.match(/\.(\d+)-(\d+)$/);
+      if (range) pingTargetCount = Math.max(0, Number(range[2]) - Number(range[1]) + 1);
+      else if (value.endsWith('/24')) pingTargetCount = 254;
+      else pingTargetCount = 1;
+      document.getElementById('ping-total').textContent = pingTargetCount;
+      pingStatus.className = 'badge success'; pingStatus.textContent = `已载入 ${pingTargetCount} 个目标`; status.className = 'status connected'; statusText.textContent = `已展开 ${pingTargetCount} 个 IP，点击“开始 Ping”执行`;
+    }
+    document.getElementById('ping-scan').addEventListener('click', setPingTargets);
+    document.getElementById('ping-import').addEventListener('click', () => { pingTarget.value = 'targets.txt'; pingTargetCount = 0; pingStatus.textContent = '等待选择本地文件'; statusText.textContent = '原型中已触发目标文件选择'; });
+    pingStart.addEventListener('click', () => {
+      if (!pingTargetCount) { setPingTargets(); if (!pingTargetCount) return; }
+      pingStart.disabled = true; pingStop.disabled = false; pingStatus.className = 'badge warn'; pingStatus.textContent = '检测中'; document.getElementById('ping-progress').textContent = `正在 Ping ${pingTargetCount} 个目标`; statusText.textContent = `并发 ${document.getElementById('ping-concurrency').value}，每目标 ${document.getElementById('ping-count').value} 次`;
+    });
+    pingStop.addEventListener('click', () => { pingStart.disabled = false; pingStop.disabled = true; pingStatus.className = 'badge'; pingStatus.textContent = '已停止'; document.getElementById('ping-progress').textContent = '检测已停止'; statusText.textContent = '群 Ping 已停止'; });
+    document.getElementById('ping-clear').addEventListener('click', () => { ['ping-total','ping-online','ping-offline'].forEach(id => document.getElementById(id).textContent = '0'); document.getElementById('ping-average').textContent = '0 ms'; document.getElementById('ping-results').innerHTML = '<tr><td colspan="4" class="muted">请先扫描网段或导入文件</td></tr>'; pingTargetCount = 0; pingStatus.className = 'badge'; pingStatus.textContent = '等待目标'; document.getElementById('ping-progress').textContent = '尚未检测'; statusText.textContent = '群 Ping 结果已清空'; });
+    window.addEventListener('keydown', event => { if (event.key === 'Escape') { if (sqlConditionModal.classList.contains('open')) document.getElementById('sql-condition-cancel').click(); else if (sqlConditionViewModal.classList.contains('open')) document.getElementById('sql-condition-view-close').click(); else if (dangerModal.classList.contains('open')) document.getElementById('danger-cancel').click(); else if (search.value) { search.value = ''; search.dispatchEvent(new Event('input')); } } });
+    document.querySelectorAll('.cron-field').forEach(field => field.addEventListener('change', () => {
+      const values = [...document.querySelectorAll('.cron-field')].map(input => input.value);
+      document.getElementById('cron-code').textContent = values.join(' ');
+      statusText.textContent = '表达式已更新并通过校验';
+    }));
+    const mobileMenu = document.getElementById('mobile-menu');
+    const sidebar = document.querySelector('.sidebar');
+    mobileMenu.addEventListener('click', () => { const open = sidebar.classList.toggle('mobile-open'); mobileMenu.setAttribute('aria-expanded', open); });
+    navItems.forEach(item => item.addEventListener('click', () => { sidebar.classList.remove('mobile-open'); mobileMenu.setAttribute('aria-expanded', 'false'); }));
+    window.addEventListener('keydown', event => { if (event.ctrlKey && event.key.toLowerCase() === 'k') { event.preventDefault(); search.focus(); } });
+  </script>
+</body>
+</html>
