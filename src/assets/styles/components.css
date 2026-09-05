@@ -60,3 +60,19 @@ th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align:
 .modal-backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: color-mix(in oklch, var(--fg) 38%, transparent); }
 .modal { width: min(560px, 100%); padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: var(--elev-raised); }
 .modal h2 { margin-top: 0; }
+.object-toolbar, .result-toolbar, .pagination { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.object-toolbar { justify-content: space-between; }
+.object-tree { display: grid; gap: 4px; max-height: 330px; margin: 12px 0 0; padding: 0; overflow: auto; list-style: none; }
+.object-button { width: 100%; padding: 7px 8px; border: 0; border-radius: 4px; background: transparent; color: var(--fg); text-align: left; }
+.object-button:hover { background: var(--border-soft); }
+.sql-editor { min-height: 260px; resize: vertical; }
+.result-toolbar { margin-bottom: 12px; }
+.result-toolbar .input { min-width: 140px; flex: 1; }
+.result-table-wrap { max-height: 360px; overflow: auto; border: 1px solid var(--border); }
+.result-table { min-width: 100%; }
+.result-table th { position: sticky; top: 0; background: var(--surface); white-space: nowrap; }
+.pagination { justify-content: flex-end; margin-top: 12px; }
+.error-text { color: var(--danger); font-size: 12px; }
+.inline-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (max-width: 980px) { .database-layout { grid-template-columns: 1fr; } .database-sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .database-sidebar { grid-template-columns: 1fr; } }

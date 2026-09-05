@@ -7,6 +7,11 @@
 .screen-content { min-height: 0; overflow: auto; padding: 20px 24px 24px; }
 .tool-screen { min-height: 100%; }
 .tool-screen.with-log { display: flex; flex-direction: column; }
+.database-workbench { min-height: 0; }
+.database-layout { display: grid; min-height: 520px; grid-template-columns: minmax(240px, 280px) minmax(0, 1fr); gap: 16px; }
+.database-sidebar, .database-main { min-width: 0; }
+.database-sidebar { display: grid; align-content: start; gap: 16px; }
+.database-sidebar .panel + .panel { margin-top: 0; }
 .equal-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .equal-columns > .panel + .panel, .stack > .panel + .panel { margin-top: 0; }
 .stack { display: grid; gap: 16px; }

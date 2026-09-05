@@ -30,6 +30,41 @@
         "security": [{ "bearerAuth": [] }],
         "responses": { "200": { "description": "SSE stream", "content": { "text/event-stream": {} } } }
       }
+    },
+    "/api/database/sessions": {
+      "post": {
+        "summary": "Open an isolated user SQLite session",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateSessionRequest" } } } },
+        "responses": { "200": { "description": "Session opened", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponse" } } } } }
+      }
+    },
+    "/api/database/sessions/{sessionId}/metadata": {
+      "get": {
+        "summary": "List SQLite objects",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "sessionId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Metadata", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponse" } } } } }
+      }
+    },
+    "/api/database/sessions/{sessionId}/queries": {
+      "post": {
+        "summary": "Submit paged SQLite SQL",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "sessionId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Task accepted", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponse" } } } } }
+      }
+    },
+    "/api/database/queries/{taskId}/events": {
+      "get": {
+        "summary": "Replayable database query events",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "taskId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "Last-Event-ID", "in": "header", "required": false, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "SSE stream", "content": { "text/event-stream": {} } } }
+      }
     }
   },
   "components": {
@@ -56,6 +91,14 @@
           "version": { "type": "string" },
           "status": { "type": "string", "enum": ["UP"] },
           "traceId": { "type": "string" }
+        }
+      },
+      "CreateSessionRequest": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": { "type": "string" },
+          "password": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 65535 } }
         }
       },
       "SseEvent": {
