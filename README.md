@@ -1,5 +1,7 @@
 # ToolHelper Vue
 
+调试工具助手 Vue 版。
+
 ToolHelper 高保真前端原型的标准 Vue 3 + Vite 工程，采用 Vue Router、Pinia、Composition API 和组件化页面结构，不再通过 iframe 加载旧 HTML。当前重构范围是前端架构与演示交互，尚未接入 Java/C# 后端或本机系统能力。
 
 ## 环境要求
