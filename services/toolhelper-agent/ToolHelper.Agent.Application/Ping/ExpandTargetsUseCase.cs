@@ -19,7 +19,7 @@ public sealed class ExpandTargetsUseCase
             var line = raw.Trim();
             if (line.Length == 0 || line.StartsWith('#')) continue;
             var expanded = ExpandLine(line);
-            estimated += expanded.Count;
+            estimated += line.Contains('/') ? EstimateCidrHosts(line) : expanded.Count;
             foreach (var address in expanded)
             {
                 if (seen.Add(address)) addresses.Add(address);
@@ -66,5 +66,15 @@ public sealed class ExpandTargetsUseCase
             result.Add(new IPAddress(bytes).ToString());
         }
         return result;
+    }
+
+    private static int EstimateCidrHosts(string line)
+    {
+        var parts = line.Split('/', 2);
+        if (parts.Length != 2 || !IPAddress.TryParse(parts[0], out var address) || address.AddressFamily != AddressFamily.InterNetwork)
+            throw new ArgumentException("仅支持 IPv4 CIDR");
+        if (!int.TryParse(parts[1], out var prefix) || prefix is < 16 or > 30)
+            throw new ArgumentException("前缀长度需在 16-30 之间（避免过大网段）");
+        return (int)(((long)1 << (32 - prefix)) - 2);
     }
 }
