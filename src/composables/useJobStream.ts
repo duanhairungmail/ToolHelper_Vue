@@ -13,6 +13,7 @@ export interface JobEvent {
 interface ConnectOptions {
   signal?: AbortSignal
   reconnect?: boolean
+  onEvent?: (event: JobEvent) => void
 }
 
 export function useJobStream(initialLines: readonly string[] = []) {
@@ -65,6 +66,7 @@ export function useJobStream(initialLines: readonly string[] = []) {
             seenEventIds.add(event.eventId)
             lastEventId.value = event.eventId
             append(event.payload.message || event.type)
+            options.onEvent?.(event)
           }, controller.signal)
           if (!options.reconnect) break
           await delay(1000, controller.signal)

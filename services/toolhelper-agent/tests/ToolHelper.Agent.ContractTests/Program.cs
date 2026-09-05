@@ -8,10 +8,23 @@ using Microsoft.Extensions.DependencyInjection;
 using ToolHelper.Agent.Api.Security;
 using ToolHelper.Agent.Application.Contracts;
 using ToolHelper.Agent.Infrastructure;
+using ToolHelper.Agent.Application.Ping;
 
 var response = new ApiResponse<string>(true, "OK", "ok", "data", "trace-1");
 if (!response.Success || response.Code != "OK" || response.TraceId != "trace-1")
     throw new InvalidOperationException("ApiResponse contract smoke test failed");
+
+var expander = new ExpandTargetsUseCase();
+if (expander.Execute("192.168.1.10").Targets.Count != 1 || expander.Execute("192.168.1.1-254").Targets.Count != 254)
+    throw new InvalidOperationException("Ping single/range expansion contract failed");
+var cidr30 = expander.Execute("192.168.1.0/30");
+if (cidr30.Targets.Count != 2 || cidr30.Targets[0].Address != "192.168.1.1" || cidr30.Targets[1].Address != "192.168.1.2")
+    throw new InvalidOperationException("Ping CIDR /30 expansion contract failed");
+var cidr16 = expander.Execute("10.0.0.0/16");
+if (cidr16.Targets.Count != 4096 || !cidr16.Truncated || cidr16.EstimatedTotal != 65534)
+    throw new InvalidOperationException("Ping CIDR cap contract failed");
+try { expander.Execute("192.168.1.0/15"); throw new InvalidOperationException("Ping invalid prefix was accepted"); }
+catch (ArgumentException) { }
 
 var context = new DefaultHttpContext();
 context.Connection.RemoteIpAddress = IPAddress.Parse("192.0.2.10");

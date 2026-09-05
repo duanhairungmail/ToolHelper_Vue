@@ -112,7 +112,50 @@
           "traceId": { "type": "string" },
           "payload": { "type": "object" }
         }
+      },
+      "PingExpandRequest": {
+        "type": "object",
+        "required": ["input"],
+        "properties": { "input": { "type": "string" } }
+      },
+      "PingStartRequest": {
+        "type": "object",
+        "required": ["input"],
+        "properties": {
+          "input": { "type": "string" },
+          "concurrency": { "type": "integer", "minimum": 1, "maximum": 200, "default": 50 },
+          "count": { "type": "integer", "minimum": 1, "maximum": 10, "default": 4 },
+          "timeoutMs": { "type": "integer", "minimum": 100, "maximum": 10000, "default": 1000 }
+        }
       }
+    },
+    "/api/local/ping/targets/expand": {
+      "post": {
+        "summary": "Expand group Ping targets",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PingExpandRequest" } } } },
+        "responses": { "200": { "description": "Expanded targets", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponse" } } } } }
+      }
+    },
+    "/api/local/ping/jobs": {
+      "post": {
+        "summary": "Start group Ping job",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PingStartRequest" } } } },
+        "responses": { "200": { "description": "Job started", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponse" } } } } }
+      }
+    },
+    "/api/local/ping/jobs/{jobId}": {
+      "get": { "summary": "Get group Ping job", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "jobId", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Job state" } } }
+    },
+    "/api/local/ping/jobs/{jobId}/events": {
+      "get": { "summary": "Group Ping SSE events", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "jobId", "in": "path", "required": true, "schema": { "type": "string" } }, { "name": "Last-Event-ID", "in": "header", "required": false, "schema": { "type": "string" } }], "responses": { "200": { "description": "SSE stream", "content": { "text/event-stream": {} } } } }
+    },
+    "/api/local/ping/jobs/{jobId}/cancel": {
+      "post": { "summary": "Cancel group Ping job", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "jobId", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Cancel requested" } } }
+    },
+    "/api/local/ping/jobs/{jobId}/export": {
+      "get": { "summary": "Export group Ping results", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "jobId", "in": "path", "required": true, "schema": { "type": "string" } }, { "name": "format", "in": "query", "schema": { "type": "string", "enum": ["csv", "xlsx"] } }], "responses": { "200": { "description": "Export file" } } }
     },
     "responses": {
       "HealthResponse": {
