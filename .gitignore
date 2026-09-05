@@ -5,3 +5,14 @@ dist/
 public/runtime-config.js
 **/bin/
 **/obj/
+**/.gradle/
+**/build/
+
+# Local IDE and OS files
+.vscode/
+.idea/
+.vs/
+*.user
+*.suo
+.DS_Store
+Thumbs.db

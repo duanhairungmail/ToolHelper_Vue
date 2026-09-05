@@ -20,6 +20,16 @@ npm run dev
 
 默认地址为 `http://127.0.0.1:5173/`，根路径和未知路径都会重定向到 `/remote`。除远程页外，工具页面位于 `/tools/<tool-id>`；当前业务动作仍由显式 mock service 返回，并会显示“演示模式”。
 
+## Launcher 统一启动
+
+在已安装 Java 21、Node.js/npm 和 .NET SDK 的开发环境中，可由 Launcher 统一启动 Vue、Java 和 C#：
+
+```powershell
+.\services\toolhelper-java\gradlew.bat -p .\services\toolhelper-java :launcher:run
+```
+
+Launcher 会动态分配回环端口和短期令牌，注入 Java/C# 环境变量，生成前端运行时配置，等待两个健康接口和前端页面就绪后打开浏览器。按 `Ctrl+C` 退出时会回收由本次 Launcher 启动的进程。
+
 ## 工程骨架
 
 - `services/toolhelper-java`：Gradle 多模块 Spring Boot 服务，提供 `/actuator/health` 和 SSE。

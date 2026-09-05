@@ -1,2 +1,3 @@
 rootProject.name = 'toolhelper-java'
-include 'api', 'application', 'domain', 'infrastructure'
+include 'api', 'application', 'domain', 'infrastructure', 'launcher'
+project(':launcher').projectDir = file('../toolhelper-launcher')
