@@ -1,0 +1,2 @@
+// Application 只依赖 Domain，跨服务响应契约集中在此模块。
+dependencies { api project(':domain') }

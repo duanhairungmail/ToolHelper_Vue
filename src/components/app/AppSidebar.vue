@@ -32,7 +32,7 @@ const visibleTools = computed(() => {
             :key="tool.id"
             class="nav-item"
             :class="{ active: route.name === tool.id }"
-            :to="`/tools/${tool.id}`"
+            :to="tool.id === 'remote' ? '/remote' : `/tools/${tool.id}`"
             @click="store.sidebarOpen = false"
           >{{ tool.name }}</RouterLink>
         </section>

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ToolHelper SSE event",
+  "type": "object",
+  "required": ["eventId", "type", "jobId", "timestamp", "traceId", "payload"],
+  "properties": {
+    "eventId": { "type": "string", "minLength": 1 },
+    "type": { "type": "string", "minLength": 1 },
+    "jobId": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "traceId": { "type": "string", "minLength": 1 },
+    "payload": { "type": "object" }
+  },
+  "additionalProperties": false
+}

@@ -4,10 +4,13 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "dev": "vite --host 127.0.0.1",
+    "lint": "vue-tsc --noEmit",
     "typecheck": "vue-tsc --noEmit",
+    "unit": "node --test tests/unit/*.test.mjs",
+    "contract:test": "node --test tests/contracts/*.test.mjs",
     "build": "npm run typecheck && vite build",
-    "preview": "vite preview --host 0.0.0.0"
+    "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
     "pinia": "^4.0.3",

@@ -20,12 +20,13 @@ const views: Record<ToolId, () => Promise<{ default: Component }>> = {
 }
 
 export const routes: RouteRecordRaw[] = [
-  { path: '/', redirect: '/tools/remote' },
+  { path: '/', redirect: '/remote' },
   ...tools.map((tool) => ({
-    path: `/tools/${tool.id}`,
+    path: tool.id === 'remote' ? '/remote' : `/tools/${tool.id}`,
     name: tool.id,
     component: views[tool.id],
     meta: { title: tool.name, toolId: tool.id }
   })),
-  { path: '/:pathMatch(.*)*', redirect: '/tools/remote' }
+  { path: '/tools/remote', redirect: '/remote' },
+  { path: '/:pathMatch(.*)*', redirect: '/remote' }
 ]

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ToolHelper runtime configuration",
+  "type": "object",
+  "required": ["javaApiBase", "localApiBase", "sessionToken"],
+  "additionalProperties": false,
+  "properties": {
+    "javaApiBase": { "type": "string", "format": "uri-reference" },
+    "localApiBase": { "type": "string", "format": "uri-reference" },
+    "sessionToken": { "type": "string", "minLength": 32 }
+  }
+}

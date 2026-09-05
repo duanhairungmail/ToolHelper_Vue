@@ -1,0 +1,10 @@
+plugins { id 'application' }
+
+group = 'com.toolhelper'
+version = '0.1.0'
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+application { mainClass = 'com.toolhelper.launcher.LauncherMain' }

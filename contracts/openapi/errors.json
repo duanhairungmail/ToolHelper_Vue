@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ToolHelper fixed error codes",
+  "type": "object",
+  "additionalProperties": {
+    "type": "string"
+  },
+  "properties": {
+    "AUTH_REQUIRED": { "const": "缺少服务令牌" },
+    "AUTH_INVALID": { "const": "服务令牌无效" },
+    "ORIGIN_INVALID": { "const": "请求来源不在白名单" },
+    "LOOPBACK_REQUIRED": { "const": "仅允许回环请求" },
+    "REQUEST_INVALID": { "const": "请求参数无效" },
+    "INTERNAL_ERROR": { "const": "服务内部错误" }
+  }
+}

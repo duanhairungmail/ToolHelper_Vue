@@ -1,0 +1,2 @@
+rootProject.name = 'toolhelper-java'
+include 'api', 'application', 'domain', 'infrastructure'

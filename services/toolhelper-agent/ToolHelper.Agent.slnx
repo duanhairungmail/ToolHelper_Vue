@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/ToolHelper.Agent.ContractTests/ToolHelper.Agent.ContractTests.csproj" />
+  </Folder>
+  <Project Path="ToolHelper.Agent.Api/ToolHelper.Agent.Api.csproj" />
+  <Project Path="ToolHelper.Agent.Application/ToolHelper.Agent.Application.csproj" />
+  <Project Path="ToolHelper.Agent.Domain/ToolHelper.Agent.Domain.csproj" />
+  <Project Path="ToolHelper.Agent.Infrastructure/ToolHelper.Agent.Infrastructure.csproj" />
+</Solution>

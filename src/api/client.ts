@@ -1,5 +1,6 @@
 import { ApiError } from './contracts'
 import type { ApiResponse, RequestOptions } from './contracts'
+import { createTraceId, getRuntimeConfig } from '@/config/runtime'
 
 export async function request<T>(url: string, options: RequestOptions = {}): Promise<T> {
   const { timeoutMs = 15_000, signal, ...init } = options
@@ -9,7 +10,12 @@ export async function request<T>(url: string, options: RequestOptions = {}): Pro
   signal?.addEventListener('abort', abort, { once: true })
 
   try {
-    const response = await fetch(url, { ...init, signal: controller.signal })
+    const runtime = getRuntimeConfig()
+    const headers = new Headers(init.headers)
+    headers.set('Accept', 'application/json')
+    headers.set('X-Trace-Id', createTraceId())
+    if (runtime.sessionToken) headers.set('Authorization', `Bearer ${runtime.sessionToken}`)
+    const response = await fetch(url, { ...init, headers, signal: controller.signal })
     const payload = await response.json() as ApiResponse<T> | T
     if (!response.ok) {
       throw new ApiError(`请求失败：${response.status}`, { status: response.status })

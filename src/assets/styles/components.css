@@ -14,6 +14,10 @@
 .sidebar-foot, .statusbar { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; }
 .sidebar-foot { min-height: 52px; padding: 8px 12px; }
 .statusbar { min-height: 38px; padding: 7px 24px; background: var(--surface); }
+.service-health { display: flex; gap: 12px; font-family: var(--font-mono); }
+.health-up { color: var(--success); }
+.health-down { color: var(--danger); }
+.health-unknown { color: var(--muted); }
 .status { display: flex; align-items: center; gap: 8px; }
 .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
 .status.success .status-dot { background: var(--success); }
