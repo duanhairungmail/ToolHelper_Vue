@@ -37,7 +37,7 @@ public class PingHistoryController {
         for (PingResult result : snapshot.results()) {
             jdbc.update("""
                     INSERT INTO group_ping_results(job_id,address,input_index,completion_index,status,attempts,success_count,average_delay_ms,packet_loss_percent,error)
-                    VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                    VALUES(?,?,?,?,?,?,?,?,?,?)
                     """, jobId, result.address(), result.inputIndex(), result.completionIndex(), result.status(), result.attempts(), result.successCount(), result.averageDelayMs(), result.packetLossPercent(), result.error());
         }
         return new ApiResponse<>(true, "OK", "Ping 历史已保存", null, traceId);

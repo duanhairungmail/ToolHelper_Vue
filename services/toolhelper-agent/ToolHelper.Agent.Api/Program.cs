@@ -10,6 +10,8 @@ using ToolHelper.Agent.Api.Persistence;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.AddSimpleConsole();
 var sessionToken = builder.Configuration["TOOLHELPER_SESSION_TOKEN"] ?? Environment.GetEnvironmentVariable("TOOLHELPER_SESSION_TOKEN");
 var internalToken = builder.Configuration["TOOLHELPER_INTERNAL_TOKEN"] ?? Environment.GetEnvironmentVariable("TOOLHELPER_INTERNAL_TOKEN");
 if (string.IsNullOrWhiteSpace(sessionToken) || string.IsNullOrWhiteSpace(internalToken))
@@ -35,6 +37,20 @@ builder.Services.AddSingleton<PingJobManager>();
 var port = builder.Configuration.GetValue("TOOLHELPER_LOCAL_PORT", 0);
 builder.WebHost.UseUrls($"http://127.0.0.1:{port}");
 var app = builder.Build();
+app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
+{
+    var exception = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()?.Error;
+    var traceId = context.Items.TryGetValue(TraceIdMiddleware.Key, out var value) && value is string id ? id : Guid.NewGuid().ToString("N");
+    var (status, code, message) = exception switch
+    {
+        ArgumentException argument => (StatusCodes.Status400BadRequest, "PING_REQUEST_INVALID", argument.Message),
+        KeyNotFoundException missing => (StatusCodes.Status404NotFound, "PING_JOB_NOT_FOUND", missing.Message),
+        _ => (StatusCodes.Status500InternalServerError, "PING_INTERNAL_ERROR", "群 Ping 服务内部错误")
+    };
+    context.Response.StatusCode = status;
+    context.Response.ContentType = "application/json; charset=utf-8";
+    await context.Response.WriteAsJsonAsync(new ApiResponse<object?>(false, code, message, null, traceId));
+}));
 app.UseMiddleware<RequestSecurityMiddleware>();
 app.UseMiddleware<TraceIdMiddleware>();
 
