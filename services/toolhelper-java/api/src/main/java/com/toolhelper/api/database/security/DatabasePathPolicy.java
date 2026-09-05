@@ -1,5 +1,7 @@
 package com.toolhelper.api.database.security;
 
+import com.toolhelper.api.database.DatabaseErrorCode;
+import com.toolhelper.api.database.DatabaseOperationException;
 import com.toolhelper.infrastructure.InternalDbProperties;
 import org.springframework.stereotype.Component;
 
@@ -22,28 +24,28 @@ public class DatabasePathPolicy {
     }
 
     public Path validate(Path requested) {
-        if (requested == null) throw new IllegalArgumentException("数据库路径不能为空");
+        if (requested == null) throw new DatabaseOperationException(DatabaseErrorCode.DATABASE_PATH_INVALID, "数据库路径不能为空");
         Path path = requested.toAbsolutePath().normalize();
         String extension = extension(path.getFileName().toString());
-        if (!EXTENSIONS.contains(extension)) throw new IllegalArgumentException("仅支持 .db、.sqlite、.sqlite3 文件");
+        if (!EXTENSIONS.contains(extension)) throw new DatabaseOperationException(DatabaseErrorCode.DATABASE_PATH_INVALID, "仅支持 .db、.sqlite、.sqlite3 文件");
         if (path.equals(internalDatabase) || path.startsWith(internalRoot)) {
-            throw new IllegalArgumentException("用户数据库不得位于 ToolHelper 内部目录");
+            throw new DatabaseOperationException(DatabaseErrorCode.DATABASE_PATH_INVALID, "用户数据库不得位于 ToolHelper 内部目录");
         }
         try {
             if (Files.exists(path)) {
-                if (Files.isSymbolicLink(path) || !Files.isRegularFile(path)) throw new IllegalArgumentException("数据库必须是普通文件，禁止符号链接");
-                if (Files.size(path) > MAX_BYTES) throw new IllegalArgumentException("数据库文件超过 2 GiB 限制");
+                if (Files.isSymbolicLink(path) || !Files.isRegularFile(path)) throw new DatabaseOperationException(DatabaseErrorCode.DATABASE_PATH_INVALID, "数据库必须是普通文件，禁止符号链接");
+                if (Files.size(path) > MAX_BYTES) throw new DatabaseOperationException(DatabaseErrorCode.DATABASE_PATH_INVALID, "数据库文件超过 2 GiB 限制");
             } else {
                 Path parent = path.getParent();
                 if (parent == null || !Files.isDirectory(parent) || Files.isSymbolicLink(parent)) {
-                    throw new IllegalArgumentException("数据库父目录不存在或不安全");
+                    throw new DatabaseOperationException(DatabaseErrorCode.DATABASE_PATH_INVALID, "数据库父目录不存在或不安全");
                 }
             }
             if (Files.isWritable(path) || (Files.exists(path.getParent()) && Files.isWritable(path.getParent()))) return path;
         } catch (IOException error) {
-            throw new IllegalArgumentException("无法检查数据库路径", error);
+            throw new DatabaseOperationException(DatabaseErrorCode.DATABASE_PATH_INVALID, "无法检查数据库路径", error);
         }
-        throw new IllegalArgumentException("数据库文件或父目录不可写");
+        throw new DatabaseOperationException(DatabaseErrorCode.DATABASE_READ_ONLY, "数据库文件或父目录不可写");
     }
 
     private static String extension(String name) {

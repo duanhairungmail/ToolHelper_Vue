@@ -40,7 +40,7 @@ Launcher 会动态分配回环端口和短期令牌，注入 Java/C# 环境变�
 
 Launcher 注入的 `runtime-config.js` 已被 Git 忽略，禁止将实际令牌提交到仓库。服务令牌通过 `TOOLHELPER_INTERNAL_TOKEN` 注入。
 
-数据库工作台使用 Java 独占的内部库（默认 `%LOCALAPPDATA%/ToolHelper/data/toolhelper.db`）记录任务和审计；用户 `.db`、`.sqlite`、`.sqlite3` 通过独立会话池打开，禁止指向内部目录。查询结果按页返回，导出文件为 Excel 兼容 CSV。
+数据库工作台使用 Java 独占的内部库（默认 `%LOCALAPPDATA%/ToolHelper/data/toolhelper.db`）记录任务和审计；用户 `.db`、`.sqlite`、`.sqlite3` 通过独立会话池打开，禁止指向内部目录。查询结果由 VXE-Table 展示并按页返回，导出文件为 Excel 兼容 CSV；SQLite 锁定、只读、损坏和磁盘不足会返回稳定错误码。
 
 ## 生产构建
 

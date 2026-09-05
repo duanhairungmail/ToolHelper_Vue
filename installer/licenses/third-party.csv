@@ -30,4 +30,6 @@ Spring Data JDBC,managed by Spring Boot 3.4.3,Apache-2.0,https://github.com/spri
 Flyway,10.20.1,Apache-2.0,https://github.com/flyway/flyway,internal SQLite schema migration,no,Include Flyway notice
 HikariCP,managed by Spring Boot 3.4.3,Apache-2.0,https://github.com/brettwooldridge/HikariCP,isolated user database pools,no,Include HikariCP notice
 CodeMirror 6,deferred,MIT,https://github.com/codemirror/dev,planned SQL editor,no,Lock before distribution
-VXE-Table,deferred,MIT,https://github.com/x-extends/vxe-table,planned result grid,no,Lock before distribution
+VXE-Table,4.21.5,MIT,https://github.com/x-extends/vxe-table,remote paged database result grid,no,Include MIT notice
+VXE PC UI,4.17.28,MIT,https://github.com/x-extends/vxe-pc-ui,VXE-Table runtime UI,no,Include MIT notice
+VXE UI Core,4.4.21,MIT,https://github.com/x-extends/vxe-ui,VXE-Table runtime core,no,Include MIT notice

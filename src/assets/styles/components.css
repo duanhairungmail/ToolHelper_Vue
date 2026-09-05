@@ -68,9 +68,7 @@ th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align:
 .sql-editor { min-height: 260px; resize: vertical; }
 .result-toolbar { margin-bottom: 12px; }
 .result-toolbar .input { min-width: 140px; flex: 1; }
-.result-table-wrap { max-height: 360px; overflow: auto; border: 1px solid var(--border); }
-.result-table { min-width: 100%; }
-.result-table th { position: sticky; top: 0; background: var(--surface); white-space: nowrap; }
+.result-table-wrap { min-height: 360px; overflow: hidden; border: 1px solid var(--border); }
 .pagination { justify-content: flex-end; margin-top: 12px; }
 .error-text { color: var(--danger); font-size: 12px; }
 .inline-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }

@@ -56,6 +56,12 @@ const tabs = ref<QueryTab[]>([
 ])
 
 const activeTab = computed<QueryTab>(() => tabs.value.find((tab) => tab.id === activeTabId.value) ?? tabs.value[0]!)
+const gridColumns = computed(() => (queryResult.value?.columns ?? []).map((field) => ({
+  field,
+  title: field,
+  minWidth: 140,
+  showOverflow: true
+})))
 const highRisk = computed(() => /^(INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|REPLACE|VACUUM|ATTACH|DETACH)\b/i.test(activeTab.value.sql.trim()))
 const visibleRows = computed(() => {
   const result = queryResult.value
@@ -255,7 +261,7 @@ onBeforeUnmount(() => {
             </template>
             <template v-else>
               <div v-if="queryResult" class="result-toolbar"><input v-model="resultFilter" class="input" placeholder="筛选当前页" aria-label="筛选结果"><select v-model="sortKey" class="input" aria-label="排序列"><option value="">不排序</option><option v-for="column in queryResult.columns" :key="column" :value="column">按 {{ column }} 排序</option></select><button class="btn btn-secondary" type="button" @click="sortDescending = !sortDescending">{{ sortDescending ? '降序' : '升序' }}</button><button class="btn btn-secondary" type="button" @click="copyResult">复制</button><button class="btn btn-secondary" type="button" @click="exportResult">导出 Excel(CSV)</button></div>
-              <div v-if="queryResult" class="result-table-wrap"><table class="result-table"><thead><tr><th v-for="column in queryResult.columns" :key="column">{{ column }}</th></tr></thead><tbody><tr v-for="(row, rowIndex) in visibleRows" :key="rowIndex"><td v-for="(cell, cellIndex) in row" :key="cellIndex">{{ cell }}</td></tr><tr v-if="!visibleRows.length"><td :colspan="Math.max(queryResult.columns.length, 1)" class="muted">没有匹配结果</td></tr></tbody></table></div>
+              <div v-if="queryResult" class="result-table-wrap"><vxe-grid border stripe height="360" :columns="gridColumns" :data="visibleRows" :scroll-y="{ enabled: true, gt: 100 }" :row-config="{ isHover: true }"><template #empty>没有匹配结果</template></vxe-grid></div>
               <div v-if="queryResult" class="pagination"><span class="muted">第 {{ queryPage + 1 }} 页 · 当前 {{ visibleRows.length }} 行{{ queryResult.hasMore ? '以上' : '' }}</span><button class="btn btn-ghost" type="button" :disabled="queryPage === 0 || loading" @click="previousPage">上一页</button><button class="btn btn-ghost" type="button" :disabled="!queryResult.hasMore || loading" @click="nextPage">下一页</button></div>
               <div v-else class="empty-state">执行查询后显示分页结果</div>
             </template>

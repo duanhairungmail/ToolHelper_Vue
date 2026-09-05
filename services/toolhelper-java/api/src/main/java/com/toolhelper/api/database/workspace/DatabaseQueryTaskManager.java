@@ -1,6 +1,7 @@
 package com.toolhelper.api.database.workspace;
 
 import com.toolhelper.api.database.audit.InternalAuditRepository;
+import com.toolhelper.api.database.DatabaseErrorClassifier;
 import com.toolhelper.api.database.security.SqlRiskClassifier;
 import com.toolhelper.application.contract.DatabaseContracts;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -58,9 +60,18 @@ public class DatabaseQueryTaskManager implements AutoCloseable {
     public void cancel(String taskId) {
         QueryTask task = tasks.get(taskId);
         if (task == null) throw new IllegalArgumentException("查询任务不存在");
-        task.cancelled = true;
-        if (task.statement != null) try { task.statement.cancel(); } catch (Exception ignored) { }
-        if (task.future != null) task.future.cancel(true);
+        if (task.completed) return;
+        task.cancelRequested = true;
+        PreparedStatement statement = task.statement;
+        if (statement != null) {
+            try {
+                statement.cancel();
+            } catch (Exception error) {
+                audit.record(task.sessionId, "QUERY_CANCEL", 0, 0, "CANCEL_REQUEST_FAILED", task.traceId);
+            }
+        }
+        java.util.concurrent.Future<?> future = task.future;
+        if (future != null) future.cancel(true);
     }
 
     public SseEmitter events(String taskId, String lastEventId) {
@@ -69,7 +80,7 @@ public class DatabaseQueryTaskManager implements AutoCloseable {
         SseEmitter emitter = new SseEmitter(30_000L);
         executor.submit(() -> {
             try {
-                while (!task.completed && !task.cancelled) Thread.sleep(50);
+                while (!task.completed) Thread.sleep(50);
                 if (!"1".equals(lastEventId)) {
                     DatabaseContracts.QueryResult result = task.result;
                     Map<String, Object> payload = new LinkedHashMap<>();
@@ -123,15 +134,18 @@ public class DatabaseQueryTaskManager implements AutoCloseable {
                         for (int i = 1; i <= metadata.getColumnCount(); i++) row.add(resultSet.getObject(i));
                         rows.add(row);
                     }
+                    if (task.cancelRequested) throw new CancellationException("查询已取消");
                     task.result = new DatabaseContracts.QueryResult(task.id, "SUCCEEDED", columns, rows, rowCount, hasMore, null, task.traceId);
                 }
             } else {
                 rowCount = statement.executeUpdate();
+                if (task.cancelRequested) throw new CancellationException("查询已取消");
                 task.result = new DatabaseContracts.QueryResult(task.id, "SUCCEEDED", List.of(), List.of(), rowCount, false, null, task.traceId);
             }
         } catch (Exception error) {
-            resultCode = task.cancelled ? "QUERY_CANCELLED" : "QUERY_FAILED";
-            task.result = new DatabaseContracts.QueryResult(task.id, task.cancelled ? "CANCELLED" : "FAILED",
+            boolean cancelled = task.cancelRequested;
+            resultCode = cancelled ? "QUERY_CANCELLED" : DatabaseErrorClassifier.classifyCode(error).value();
+            task.result = new DatabaseContracts.QueryResult(task.id, cancelled ? "CANCELLED" : "FAILED",
                     List.of(), List.of(), rowCount, false, resultCode, task.traceId);
         } finally {
             task.completed = true;
@@ -171,7 +185,7 @@ public class DatabaseQueryTaskManager implements AutoCloseable {
         private final String traceId;
         private volatile java.util.concurrent.Future<?> future;
         private volatile PreparedStatement statement;
-        private volatile boolean cancelled;
+        private volatile boolean cancelRequested;
         private volatile boolean completed;
         private volatile DatabaseContracts.QueryResult result;
 

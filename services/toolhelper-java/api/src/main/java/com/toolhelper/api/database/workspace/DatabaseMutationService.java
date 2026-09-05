@@ -1,5 +1,6 @@
 package com.toolhelper.api.database.workspace;
 
+import com.toolhelper.api.database.DatabaseErrorClassifier;
 import com.toolhelper.api.database.audit.InternalAuditRepository;
 import com.toolhelper.application.contract.DatabaseContracts;
 import org.springframework.stereotype.Service;
@@ -50,18 +51,42 @@ public class DatabaseMutationService {
         String sql = "UPDATE " + quote(request.table()) + " SET " + assignments + " WHERE " + quote(request.primaryKeyColumn()) + " = ?";
         UserDatabaseSession session = sessions.require(sessionId);
         long started = System.currentTimeMillis();
-        try (Connection connection = session.dataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+        boolean transactionStarted = false;
+        boolean committed = false;
+        Connection connection = null;
+        try {
+            connection = session.dataSource().getConnection();
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
             connection.setAutoCommit(false);
+            transactionStarted = true;
             int index = 1;
             for (Object value : request.changes().values()) statement.setObject(index++, value);
             statement.setObject(index, request.primaryKeyValue());
             int updated = statement.executeUpdate();
             connection.commit();
+            committed = true;
             audit.record(sessionId, "UPDATE", System.currentTimeMillis() - started, updated, "OK", traceId);
             return updated;
+            }
         } catch (Exception error) {
+            // 在关闭连接前显式回滚，避免驱动或连接池行为变化时留下半事务。
+            if (transactionStarted && !committed && connection != null) {
+                try {
+                    connection.rollback();
+                } catch (Exception rollbackError) {
+                    error.addSuppressed(rollbackError);
+                }
+            }
             audit.record(sessionId, "UPDATE", System.currentTimeMillis() - started, 0, "MUTATION_FAILED", traceId);
-            throw new IllegalStateException("变更集提交失败", error);
+            throw DatabaseErrorClassifier.classify("变更集提交失败", error);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (Exception closeError) {
+                    // 原始操作结果已经确定，关闭失败交由连接池记录，不覆盖业务错误。
+                }
+            }
         }
     }
 

@@ -1,5 +1,8 @@
 package com.toolhelper.api.database.workspace;
 
+import com.toolhelper.api.database.DatabaseErrorCode;
+import com.toolhelper.api.database.DatabaseErrorClassifier;
+import com.toolhelper.api.database.DatabaseOperationException;
 import com.toolhelper.api.database.audit.InternalAuditRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -23,15 +26,21 @@ public class UserDatabaseSessionRegistry implements AutoCloseable {
     }
 
     public UserDatabaseSession open(Path path, char[] password, String traceId) {
-        UserDatabaseSession session = factory.open(path, password);
-        sessions.put(session.id(), session);
-        audit.record(session.id(), "SESSION_OPEN", 0, 0, "OK", traceId);
-        return session;
+        try {
+            UserDatabaseSession session = factory.open(path, password);
+            sessions.put(session.id(), session);
+            audit.record(session.id(), "SESSION_OPEN", 0, 0, "OK", traceId);
+            return session;
+        } catch (DatabaseOperationException error) {
+            throw error;
+        } catch (RuntimeException error) {
+            throw DatabaseErrorClassifier.classify("打开数据库会话失败", error);
+        }
     }
 
     public UserDatabaseSession require(String id) {
         UserDatabaseSession session = sessions.get(id);
-        if (session == null) throw new IllegalArgumentException("数据库会话不存在或已关闭");
+        if (session == null) throw new DatabaseOperationException(DatabaseErrorCode.DATABASE_SESSION_CLOSED, "数据库会话不存在或已关闭");
         return session;
     }
 
