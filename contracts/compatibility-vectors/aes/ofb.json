@@ -1,0 +1,22 @@
+{
+  "mode": "OFB",
+  "status": "draft",
+  "sourceBehavior": "System.Security.Cryptography.Aes OFB; IV 截取或右补零至 16 字节。",
+  "cases": [
+    {
+      "caseId": "aes-ofb-none-128-hex-001",
+      "keySizeBits": 128,
+      "padding": "None",
+      "keyFormat": "HEX",
+      "ivFormat": "HEX",
+      "inputFormat": "HEX",
+      "key": "000102030405060708090a0b0c0d0e0f",
+      "iv": "101112131415161718191a1b1c1d1e1f",
+      "input": "00112233445566778899aabbccddeeff",
+      "expectedCiphertext": "07efcd47a5806519189744aa42497c6c",
+      "expectedRoundTrip": true,
+      "generatedBy": "Node.js crypto AES-128-OFB; confirm against original C#"
+    }
+  ],
+  "boundaryInputs": [0, 15, 16, 17]
+}

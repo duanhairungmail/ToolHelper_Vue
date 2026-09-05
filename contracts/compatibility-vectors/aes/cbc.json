@@ -1,0 +1,36 @@
+{
+  "mode": "CBC",
+  "status": "draft",
+  "sourceBehavior": "System.Security.Cryptography.Aes; IV 截取或右补零至 16 字节；Key 按目标长度截取或右补零。",
+  "cases": [
+    {
+      "caseId": "aes-cbc-pkcs7-128-hex-001",
+      "keySizeBits": 128,
+      "padding": "PKCS7",
+      "keyFormat": "HEX",
+      "ivFormat": "HEX",
+      "inputFormat": "HEX",
+      "key": "000102030405060708090a0b0c0d0e0f",
+      "iv": "101112131415161718191a1b1c1d1e1f",
+      "input": "00112233445566778899aabbccddeeff",
+      "expectedCiphertext": "1eca870ffea114b7fd6cf363c30b96b10d47f7c33722bae48a4489a6bb9d993d",
+      "expectedRoundTrip": true,
+      "generatedBy": "Node.js crypto AES-128-CBC with PKCS7; confirm against original C#"
+    },
+    {
+      "caseId": "aes-cbc-pkcs7-256-hex-002",
+      "keySizeBits": 256,
+      "padding": "PKCS7",
+      "keyFormat": "HEX",
+      "ivFormat": "HEX",
+      "inputFormat": "HEX",
+      "key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "iv": "101112131415161718191a1b1c1d1e1f",
+      "input": "00112233445566778899aabbccddeeff",
+      "expectedCiphertext": "0e2392dd6f690b44a5a1b4fdff3b7f8303657c008fa9cf5c86c1a750a150a5fe",
+      "expectedRoundTrip": true,
+      "generatedBy": "Node.js crypto AES-256-CBC with PKCS7; confirm against original C#"
+    }
+  ],
+  "boundaryInputs": [0, 15, 16, 17]
+}

@@ -1,0 +1,57 @@
+{
+  "baselineId": "toolhelper-v3-2026-09",
+  "status": "implementation-in-progress",
+  "source": {
+    "path": "D:/DevlopProject/ToolHelper",
+    "version": "3.0.0",
+    "gitCommit": "19c38ec72793ef6f5dbb08de04313408092e33a1",
+    "branch": "main",
+    "gitDescribe": "v4.0.0-1-g19c38ec",
+    "workingTree": "clean",
+    "remote": "https://github.com/duanhairungmail/ToolHelper.git"
+  },
+  "environment": {
+    "dotnetSdk": "10.0.400",
+    "targetFramework": "net8.0-windows",
+    "node": "24.19.0",
+    "npm": "12.0.2",
+    "windowsVersion": "10.0.26200",
+    "windowsArchitecture": "win-x64",
+    "kylinImage": null,
+    "testDevices": []
+  },
+  "packages": {
+    "BouncyCastle.Cryptography": "2.7.0",
+    "CommunityToolkit.Mvvm": "8.4.2",
+    "EPPlus": "8.6.1",
+    "MaterialDesignColors": "5.3.2",
+    "MaterialDesignThemes": "5.3.2",
+    "Microsoft.Web.WebView2": "1.0.4078.44",
+    "Newtonsoft.Json": "13.0.4",
+    "SSH.NET": "2026.0.0",
+    "System.Security.Cryptography.Xml": "8.0.4",
+    "System.IO.Ports": "10.0.9",
+    "System.Data.OleDb": "10.0.0",
+    "DocumentFormat.OpenXml": "3.2.0"
+  },
+  "artifacts": {
+    "aes": [
+      "aes/cbc.json",
+      "aes/ecb.json",
+      "aes/ofb.json",
+      "aes/cfb.json",
+      "aes/cts.json",
+      "aes/ctr.json",
+      "aes/gcm.json"
+    ],
+    "ping": ["ping/input-rules.json"],
+    "kylin": ["kylin/feature-baseline.md"],
+    "resources": "resources/manifest.sha256"
+  },
+  "knownLimitations": [
+    "当前环境没有目标 KylinOS X86_64 测试机或镜像，KylinOS 行为仅记录源码命令和待测项。",
+    "NuGet 源访问失败，未执行原始 WPF 项目的完整还原/构建验证。",
+    "AES CTS 在当前 .NET Aes provider 上设置 CipherMode.CTS 会报告不支持，已作为兼容风险记录。",
+    "阶段 0 验收、签字和兼容结论暂不执行。"
+  ]
+}

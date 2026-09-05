@@ -1,0 +1,78 @@
+{
+  "status": "implementation-in-progress",
+  "source": "D:/DevlopProject/ToolHelper/Views/Other/GroupPingView.cs",
+  "limits": {
+    "ipv4CidrPrefix": { "min": 16, "max": 30 },
+    "maxExpandedTargets": 4096,
+    "defaultConcurrency": 50,
+    "concurrency": { "min": 1, "max": 200 },
+    "defaultCount": 4,
+    "count": { "min": 1, "max": 10 },
+    "defaultTimeoutMs": 1000,
+    "timeoutMs": { "min": 100, "max": 10000 }
+  },
+  "cases": [
+    {
+      "caseId": "ping-single-ip-001",
+      "input": "192.168.1.10",
+      "expectedTargetCount": 1,
+      "expectedTargets": ["192.168.1.10"]
+    },
+    {
+      "caseId": "ping-range-001",
+      "input": "192.168.1.1-254",
+      "expectedTargetCount": 254,
+      "expectedFirst": "192.168.1.1",
+      "expectedLast": "192.168.1.254"
+    },
+    {
+      "caseId": "ping-cidr-30-001",
+      "input": "192.168.1.0/30",
+      "expectedTargetCount": 2,
+      "expectedTargets": ["192.168.1.1", "192.168.1.2"]
+    },
+    {
+      "caseId": "ping-cidr-24-001",
+      "input": "192.168.1.0/24",
+      "expectedTargetCount": 254,
+      "expectedFirst": "192.168.1.1",
+      "expectedLast": "192.168.1.254"
+    },
+    {
+      "caseId": "ping-cidr-16-cap-001",
+      "input": "10.0.0.0/16",
+      "expectedTargetCount": 4096,
+      "expectedFirst": "10.0.0.1",
+      "expectedLast": "10.0.16.0",
+      "note": "原实现静默截断到 4096；新服务需要显式返回 truncated。"
+    },
+    {
+      "caseId": "ping-invalid-prefix-001",
+      "input": "192.168.1.0/15",
+      "expectedError": "前缀长度需在 16-30 之间（避免过大网段）"
+    },
+    {
+      "caseId": "ping-ipv6-001",
+      "input": "2001:db8::/64",
+      "expectedError": "仅支持 IPv4"
+    },
+    {
+      "caseId": "ping-range-invalid-001",
+      "input": "192.168.1.254-1",
+      "expectedError": "范围需在 1-254 之间"
+    }
+  ],
+  "importRules": {
+    "format": "one target per line",
+    "trimWhitespace": true,
+    "ignoreBlankLines": true,
+    "ignoreCommentPrefix": "#",
+    "deduplicate": true,
+    "sourceBehavior": "原实现导入文本后不做 IP 格式校验，需在兼容测试中单独确认。"
+  },
+  "resultRules": {
+    "status": ["在线", "部分丢包", "超时/失败"],
+    "averageDelay": "只统计成功包，整数除法",
+    "ordering": "完成顺序写入结果集合，需与后续 C# 代理的 inputIndex/completionIndex 分开记录"
+  }
+}

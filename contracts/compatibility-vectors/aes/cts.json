@@ -1,0 +1,22 @@
+{
+  "mode": "CTS",
+  "status": "blocked-pending-provider",
+  "sourceBehavior": "原始代码选择 CipherMode.CTS 与 PaddingMode.None；当前 Windows .NET provider 设置 CTS 报 InvalidOperationException。",
+  "cases": [
+    {
+      "caseId": "aes-cts-provider-001",
+      "keySizeBits": 128,
+      "padding": "None",
+      "keyFormat": "HEX",
+      "ivFormat": "HEX",
+      "inputFormat": "HEX",
+      "key": "000102030405060708090a0b0c0d0e0f",
+      "iv": "101112131415161718191a1b1c1d1e1f",
+      "input": "00112233445566778899aabbccddeeff00112233",
+      "expectedError": "Specified cipher mode is not valid for this algorithm.",
+      "expectedRoundTrip": false,
+      "observedOn": "当前 Windows .NET SDK 10.0.400 runtime provider"
+    }
+  ],
+  "nextAction": "在原目标运行环境确认 Provider 行为；若仍不支持，必须在兼容矩阵标记不支持或实现独立 CTS adapter。"
+}

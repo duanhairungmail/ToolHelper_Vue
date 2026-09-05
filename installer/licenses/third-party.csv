@@ -1,0 +1,27 @@
+component,version,license,source,usage,modified,distributionNotes
+Vue,3.5.21,MIT,https://github.com/vuejs/core,frontend runtime,no,Include MIT notice
+Vue Router,4.5.1,MIT,https://github.com/vuejs/router,frontend routing,no,Include MIT notice
+Pinia,4.0.3,MIT,https://github.com/vuejs/pinia,frontend state,no,Include MIT notice
+Vite,7.1.5,MIT,https://github.com/vitejs/vite,frontend build/dev server,no,Include MIT notice
+TypeScript,5.9.2,Apache-2.0,https://github.com/microsoft/TypeScript,frontend compiler,no,Verify bundled license text
+vue-tsc,3.0.6,MIT,https://github.com/vuejs/language-tools,frontend type checking,no,Include MIT notice
+BouncyCastle.Cryptography,2.7.0,MIT,https://www.bouncycastle.org/csharp,original C# AES provider,no,Verify package notice
+CommunityToolkit.Mvvm,8.4.2,MIT,https://github.com/CommunityToolkit/dotnet,original C# MVVM,no,Verify package notice
+EPPlus,8.6.1,Polyform Noncommercial 1.0 / commercial,https://epplussoftware.com,original C# XLSX export,no,Commercial use requires separate license
+MaterialDesignColors,5.3.2,MIT,https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit,original C# theme,no,Verify package notice
+MaterialDesignThemes,5.3.2,MIT,https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit,original C# WPF theme,no,Verify package notice
+Microsoft.Web.WebView2,1.0.4078.44,MIT,https://github.com/MicrosoftEdge/WebView2Feedback,original C# embedded browser,no,Runtime redistribution terms apply
+Newtonsoft.Json,13.0.4,MIT,https://github.com/JamesNK/Newtonsoft.Json,original C# JSON,no,Include MIT notice
+SSH.NET,2026.0.0,MIT,https://github.com/sshnet/SSH.NET,original C# SSH/SFTP,no,Verify package notice
+System.Security.Cryptography.Xml,8.0.4,MIT,https://github.com/dotnet/runtime,original C# crypto XML,no,Microsoft runtime license
+System.IO.Ports,10.0.9,MIT,https://github.com/dotnet/runtime,original C# serial,no,Microsoft runtime license
+System.Data.OleDb,10.0.0,MIT,https://github.com/dotnet/runtime,original C# Access/Excel,no,Microsoft runtime license
+DocumentFormat.OpenXml,3.2.0,MIT,https://github.com/dotnet/Open-XML-SDK,original C# OpenXML export,no,Include MIT notice
+Electerm Web,version to lock,MIT,https://github.com/electerm/electerm-web,planned remote integration,no,Lock release/version before distribution
+Node.js,22.23.1,MIT,https://nodejs.org,planned bundled runtime,no,Include Node.js license and notices
+Node-RED,5.0.4,Apache-2.0,https://github.com/node-red/node-red,planned bundled runtime,no,Lock dependency tree before distribution
+node-red-node-serialport,2.0.3,Apache-2.0,https://github.com/node-red/node-red-nodes,planned Node-RED node,no,Verify package notice
+node-red-contrib-modbus,5.60.2,MIT,https://flows.nodered.org/node/node-red-contrib-modbus,planned Node-RED node,no,Verify package notice
+x11vnc,source binary, GPL-2.0-or-later,https://github.com/LibVNC/x11vnc,planned KylinOS VNC deployment,no,Verify binary provenance and source offer
+KylinOS offline patch,1.0.0.33-0k1.11,license to verify,local Resources/plugins/Security patch,planned KylinOS vulnerability repair,no,Do not distribute until license is verified
+DBX,version to lock,license to verify,https://github.com/t8y2/dbx,planned database integration,no,Do not distribute until license is verified

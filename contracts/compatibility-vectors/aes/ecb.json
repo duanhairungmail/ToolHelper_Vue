@@ -1,0 +1,20 @@
+{
+  "mode": "ECB",
+  "status": "draft",
+  "sourceBehavior": "System.Security.Cryptography.Aes; ECB 不读取 IV；Key 按目标长度截取或右补零。",
+  "cases": [
+    {
+      "caseId": "aes-ecb-pkcs7-128-hex-001",
+      "keySizeBits": 128,
+      "padding": "PKCS7",
+      "keyFormat": "HEX",
+      "inputFormat": "HEX",
+      "key": "000102030405060708090a0b0c0d0e0f",
+      "input": "00112233445566778899aabbccddeeff",
+      "expectedCiphertext": "69c4e0d86a7b0430d8cdb78070b4c55a954f64f2e4e86e9eee82d20216684899",
+      "expectedRoundTrip": true,
+      "generatedBy": "Node.js crypto AES-128-ECB with PKCS7; confirm against original C#"
+    }
+  ],
+  "boundaryInputs": [0, 15, 16, 17]
+}

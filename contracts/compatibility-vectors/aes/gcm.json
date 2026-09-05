@@ -1,0 +1,26 @@
+{
+  "mode": "GCM",
+  "status": "draft",
+  "sourceBehavior": "AesGcm；nonce 取 IV 前 12 字节或右补零；tag 固定 16 字节；输出 nonce + tag + ciphertext；无 AAD。",
+  "cases": [
+    {
+      "caseId": "aes-gcm-none-128-hex-001",
+      "keySizeBits": 128,
+      "padding": "None",
+      "keyFormat": "HEX",
+      "ivFormat": "HEX",
+      "inputFormat": "HEX",
+      "key": "000102030405060708090a0b0c0d0e0f",
+      "iv": "101112131415161718191a1b1c1d1e1f",
+      "input": "00112233445566778899aabbccddeeff",
+      "expectedNonce": "101112131415161718191a1b",
+      "expectedTag": "04f771ec4ba043761b723a825f6a3833",
+      "expectedCiphertext": "c43f219c4b1ad0989f44f74e0bfa05c1",
+      "expectedCombined": "101112131415161718191a1b04f771ec4ba043761b723a825f6a3833c43f219c4b1ad0989f44f74e0bfa05c1",
+      "expectedRoundTrip": true,
+      "generatedBy": "Node.js crypto AES-128-GCM; confirm against original C#"
+    }
+  ],
+  "boundaryInputs": [0, 15, 16, 17],
+  "tamperCases": ["nonce-bit-flip", "tag-bit-flip", "ciphertext-bit-flip"]
+}

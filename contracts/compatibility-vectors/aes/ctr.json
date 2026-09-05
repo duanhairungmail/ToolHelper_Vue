@@ -1,0 +1,23 @@
+{
+  "mode": "CTR",
+  "status": "draft",
+  "sourceBehavior": "原始代码使用 AES-ECB 生成密钥流，计数器从 IV 末字节向前进位递增；忽略 padding。",
+  "cases": [
+    {
+      "caseId": "aes-ctr-none-128-hex-001",
+      "keySizeBits": 128,
+      "padding": "None",
+      "keyFormat": "HEX",
+      "ivFormat": "HEX",
+      "inputFormat": "HEX",
+      "key": "000102030405060708090a0b0c0d0e0f",
+      "iv": "101112131415161718191a1b1c1d1e1f",
+      "input": "00112233445566778899aabbccddeeff",
+      "expectedCiphertext": "07efcd47a5806519189744aa42497c6c",
+      "expectedRoundTrip": true,
+      "generatedBy": "按原始 C# AesCtr 算法复现；确认多块进位"
+    }
+  ],
+  "boundaryInputs": [0, 15, 16, 17],
+  "extraCases": ["counter-increment-carry-at-last-byte"]
+}
