@@ -1,26 +1,46 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import ToolPageLayout from '@/layouts/ToolPageLayout.vue'
 import BasePanel from '@/components/common/BasePanel.vue'
 import LogDrawer from '@/components/feedback/LogDrawer.vue'
 import { useAppStore } from '@/stores/app'
 import { useJobStream } from '@/composables/useJobStream'
-import { useMockTask } from '@/composables/useMockTask'
-import { remoteService } from '@/mocks/services/tool-services'
+import { checkHealth } from '@/api/health'
+import { createTraceId, getRuntimeConfig, joinApiUrl, runtimeConfigured } from '@/config/runtime'
 import type { JavaLifecycleRequest } from '@/api/java/client'
 
 const store = useAppStore()
-const { lines, append, clear } = useJobStream(['远程外挂连接页面已就绪'])
-const { state, execute } = useMockTask(remoteService)
-const running = computed(() => state.value.status === 'loading')
+const { lines, append, clear, connect } = useJobStream(['远程外挂连接页面已就绪'])
+const running = ref(false)
+const connected = ref(false)
 const expanded = ref(true)
 
 async function run(action: JavaLifecycleRequest['action']) {
+  if (running.value) return
+  if (!runtimeConfigured()) {
+    append('运行时未配置，无法连接 Java 服务')
+    store.setStatus('Java 服务未配置', 'error')
+    return
+  }
+
+  running.value = true
+  connected.value = false
   append(`请求远程外挂${action}`)
-  const result = await execute({ action })
-  if (!result) return
-  append(result.message)
-  store.setStatus(result.message, 'success')
+  const runtime = getRuntimeConfig()
+  const jobId = createTraceId()
+  try {
+    await checkHealth(runtime.javaApiBase, '/actuator/health')
+    append('Java API 健康检查通过')
+    await connect(joinApiUrl(runtime.javaApiBase, `/api/jobs/${jobId}/events`), { reconnect: false })
+    connected.value = true
+    store.setStatus(`远程外挂${action}完成`, 'success')
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Java API 请求失败'
+    append(message)
+    store.setStatus(message, 'error')
+  } finally {
+    running.value = false
+  }
 }
 
 function openWeb() {
@@ -34,7 +54,7 @@ function openWeb() {
   <ToolPageLayout tool-id="remote">
     <div class="tool-screen with-log" data-od-id="remote-screen">
       <BasePanel title="Electerm Web 运行状态">
-        <template #actions><span class="badge" :class="running ? 'warn' : ''">{{ running ? '处理中' : '演示模式' }}</span></template>
+        <template #actions><span class="badge" :class="running ? 'warn' : connected ? '' : 'warn'">{{ running ? '处理中' : connected ? '已连接' : '待连接' }}</span></template>
         <p class="muted">仅管理 Electerm Web 外挂生命周期，不在此页面收集 SSH、RDP、VNC 凭据。</p>
         <div class="button-row top-gap">
           <button class="btn btn-primary" type="button" :disabled="running" @click="run('install')">安装外挂</button>

@@ -21,6 +21,7 @@ export function useJobStream(initialLines: readonly string[] = []) {
   const seenEventIds = new Set<string>()
   let disposed = false
   let activeController: AbortController | undefined
+  let activeUrl = ''
 
   function append(line: string) {
     lines.value.push(`[${new Date().toLocaleTimeString('zh-CN', { hour12: false })}] ${line}`)
@@ -38,6 +39,11 @@ export function useJobStream(initialLines: readonly string[] = []) {
   async function connect(url: string, options: ConnectOptions = {}): Promise<void> {
     disposed = false
     activeController?.abort()
+    if (activeUrl !== url) {
+      seenEventIds.clear()
+      lastEventId.value = ''
+      activeUrl = url
+    }
     const controller = new AbortController()
     activeController = controller
     const abort = () => controller.abort()
@@ -64,6 +70,10 @@ export function useJobStream(initialLines: readonly string[] = []) {
           await delay(1000, controller.signal)
         } catch (error) {
           if (controller.signal.aborted || disposed) break
+          if (!options.reconnect) {
+            append(error instanceof Error ? error.message : '日志流连接失败')
+            throw error
+          }
           attempt += 1
           append(`日志流断开，${Math.min(attempt, 5)} 秒后重连`)
           await delay(Math.min(attempt * 1000, 5000), controller.signal)

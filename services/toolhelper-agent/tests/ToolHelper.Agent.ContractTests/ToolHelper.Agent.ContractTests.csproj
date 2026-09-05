@@ -7,5 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ToolHelper.Agent.Application\ToolHelper.Agent.Application.csproj" />
+    <ProjectReference Include="..\..\ToolHelper.Agent.Api\ToolHelper.Agent.Api.csproj" />
   </ItemGroup>
 </Project>
