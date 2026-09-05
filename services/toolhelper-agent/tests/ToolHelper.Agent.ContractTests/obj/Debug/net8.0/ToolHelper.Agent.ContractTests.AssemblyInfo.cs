@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ToolHelper.Agent.ContractTests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a489dc6c2ccbd715a15096459e966800b5e60043")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7a691ed6564b8b2f8a0f472f4461f14c951e7f16")]
 [assembly: System.Reflection.AssemblyProductAttribute("ToolHelper.Agent.ContractTests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ToolHelper.Agent.ContractTests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

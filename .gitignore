@@ -3,3 +3,5 @@ dist/
 *.local
 *.log
 public/runtime-config.js
+**/bin/
+**/obj/

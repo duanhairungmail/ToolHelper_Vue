@@ -16,7 +16,7 @@ public sealed class RequestSecurityMiddleware(RequestDelegate next, RuntimeOptio
         context.Items[TraceIdMiddleware.Key] = traceId;
         context.Response.Headers["X-Content-Type-Options"] = "nosniff";
         context.Response.Headers.ContentSecurityPolicy = "default-src 'none'; frame-ancestors 'none'";
-        context.Response.Headers.ReferrerPolicy = "no-referrer";
+        context.Response.Headers["Referrer-Policy"] = "no-referrer";
         context.Response.Headers.CacheControl = "no-store";
         context.Response.Headers["X-Trace-Id"] = traceId;
 
