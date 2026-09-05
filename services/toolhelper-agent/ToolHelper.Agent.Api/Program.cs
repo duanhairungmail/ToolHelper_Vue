@@ -6,6 +6,7 @@ using ToolHelper.Agent.Application.Ping;
 using ToolHelper.Agent.Infrastructure.Export;
 using ToolHelper.Agent.Infrastructure.Network;
 using ToolHelper.Agent.Infrastructure.Persistence;
+using ToolHelper.Agent.Api.Persistence;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +27,9 @@ builder.Services.AddSingleton<CsvPingExporter>();
 builder.Services.AddSingleton<ClosedXmlPingExporter>();
 builder.Services.AddSingleton<IPingExporter>(sp => sp.GetRequiredService<CsvPingExporter>());
 builder.Services.AddSingleton<IPingExporter>(sp => sp.GetRequiredService<ClosedXmlPingExporter>());
-builder.Services.AddSingleton<IPingHistoryClient, JavaHistoryClient>();
+builder.Services.AddSingleton<JavaHistoryClient>();
+builder.Services.AddSingleton<IPingHistoryClient>(sp => sp.GetRequiredService<JavaHistoryClient>());
+builder.Services.AddHostedService<PendingSubmissionWorker>();
 builder.Services.AddSingleton<PingJobManager>();
 
 var port = builder.Configuration.GetValue("TOOLHELPER_LOCAL_PORT", 0);
