@@ -65,6 +65,22 @@
         ],
         "responses": { "200": { "description": "SSE stream", "content": { "text/event-stream": {} } } }
       }
+    },
+    "/api/java/crypto/aes/encrypt": {
+      "post": {
+        "summary": "Encrypt data with TOOLHELPER_V3 AES",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AesRequest" } } } },
+        "responses": { "200": { "description": "AES encrypted response" }, "400": { "description": "AES request invalid" } }
+      }
+    },
+    "/api/java/crypto/aes/decrypt": {
+      "post": {
+        "summary": "Decrypt data with TOOLHELPER_V3 AES",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AesRequest" } } } },
+        "responses": { "200": { "description": "AES decrypted response" }, "400": { "description": "AES request invalid" } }
+      }
     }
   },
   "components": {
@@ -126,6 +142,24 @@
           "concurrency": { "type": "integer", "minimum": 1, "maximum": 200, "default": 50 },
           "count": { "type": "integer", "minimum": 1, "maximum": 10, "default": 4 },
           "timeoutMs": { "type": "integer", "minimum": 100, "maximum": 10000, "default": 1000 }
+        }
+      },
+      "AesRequest": {
+        "type": "object",
+        "required": ["compatibilityProfile", "mode", "padding", "keySizeBits", "charset", "keyFormat", "ivFormat", "inputFormat", "outputFormat", "key", "iv", "input"],
+        "properties": {
+          "compatibilityProfile": { "type": "string", "enum": ["TOOLHELPER_V3"] },
+          "mode": { "type": "string", "enum": ["CBC", "ECB", "OFB", "CFB", "CTS", "CTR", "GCM"] },
+          "padding": { "type": "string", "enum": ["PKCS7", "NONE", "ZEROS", "ANSIX923", "ISO10126"] },
+          "keySizeBits": { "type": "integer", "enum": [128, 192, 256] },
+          "charset": { "type": "string", "enum": ["UTF-8", "UTF-16LE", "UTF-32LE", "ASCII", "GBK", "ISO-8859-1"] },
+          "keyFormat": { "type": "string", "enum": ["TEXT", "HEX", "BASE64"] },
+          "ivFormat": { "type": "string", "enum": ["TEXT", "HEX", "BASE64"] },
+          "inputFormat": { "type": "string", "enum": ["TEXT", "HEX", "BASE64"] },
+          "outputFormat": { "type": "string", "enum": ["TEXT", "HEX", "BASE64"] },
+          "key": { "type": "string" },
+          "iv": { "type": "string" },
+          "input": { "type": "string" }
         }
       }
     },

@@ -7,5 +7,7 @@ test('OpenAPI contract exposes both health endpoints and replayable SSE', () => 
   assert.ok(contract.paths['/actuator/health'])
   assert.ok(contract.paths['/health'])
   assert.ok(contract.paths['/api/jobs/{jobId}/events'])
+  assert.ok(contract.paths['/api/java/crypto/aes/encrypt'])
+  assert.ok(contract.paths['/api/java/crypto/aes/decrypt'])
   assert.deepEqual(contract.paths['/api/jobs/{jobId}/events'].get.parameters[1].schema, { type: 'string' })
 })

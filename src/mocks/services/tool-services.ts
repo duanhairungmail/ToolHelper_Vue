@@ -37,32 +37,6 @@ export const remoteService: ToolService<JavaLifecycleRequest, JavaLifecycleResul
   }
 }
 
-export interface AesRequest {
-  action: 'encrypt' | 'decrypt'
-  mode: string
-  padding: string
-  key: string
-  iv: string
-  input: string
-}
-
-export interface AesResult {
-  status: 'demo'
-  output: string
-  message: string
-}
-
-export const aesService: ToolService<AesRequest, AesResult> = {
-  async execute(request, signal) {
-    await wait(signal)
-    return {
-      status: 'demo',
-      output: `演示模式：${request.action === 'encrypt' ? '加密' : '解密'}结果待 Java AES 服务接入`,
-      message: `AES ${request.action === 'encrypt' ? '加密' : '解密'}请求已提交`
-    }
-  }
-}
-
 export const nodeRedService = demoService('Node-RED 运行时操作')
 export const databaseService = demoService('SQLite 工作台操作')
 export const serialService = demoService('串口操作')

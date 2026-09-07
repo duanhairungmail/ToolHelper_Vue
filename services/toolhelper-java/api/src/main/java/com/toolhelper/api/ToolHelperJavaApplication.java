@@ -2,6 +2,9 @@ package com.toolhelper.api;
 
 import com.toolhelper.infrastructure.RuntimeProperties;
 import com.toolhelper.infrastructure.InternalDbProperties;
+import com.toolhelper.application.crypto.AesCipherAdapter;
+import com.toolhelper.application.crypto.AesService;
+import com.toolhelper.infrastructure.crypto.BouncyCastleCipherAdapter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.boot.SpringApplication;
@@ -33,5 +36,15 @@ public class ToolHelperJavaApplication {
                 : Path.of(System.getProperty("user.home"), ".local", "share", "ToolHelper", "data", "toolhelper.db");
         String configured = environment.getProperty("toolhelper.internal-db-path");
         return new InternalDbProperties(configured == null || configured.isBlank() ? defaultPath : Path.of(configured));
+    }
+
+    @Bean
+    AesCipherAdapter aesCipherAdapter() {
+        return new BouncyCastleCipherAdapter();
+    }
+
+    @Bean
+    AesService aesService(AesCipherAdapter adapter) {
+        return new AesService(adapter);
     }
 }

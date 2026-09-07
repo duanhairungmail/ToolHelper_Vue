@@ -28,6 +28,7 @@ DBX,version to lock,license to verify,https://github.com/t8y2/dbx,planned databa
 SQLite JDBC,3.46.1.3,Apache-2.0,https://github.com/xerial/sqlite-jdbc,Java SQLite JDBC driver,no,Include Apache notice
 Spring Data JDBC,managed by Spring Boot 3.4.3,Apache-2.0,https://github.com/spring-projects/spring-data-relational,Java data access baseline,no,Include Spring notice
 Flyway,10.20.1,Apache-2.0,https://github.com/flyway/flyway,internal SQLite schema migration,no,Include Flyway notice
+Bouncy Castle Java,1.78.1,MIT,https://www.bouncycastle.org/java.html,Java AES CTS provider,no,Include Bouncy Castle notice
 HikariCP,managed by Spring Boot 3.4.3,Apache-2.0,https://github.com/brettwooldridge/HikariCP,isolated user database pools,no,Include HikariCP notice
 CodeMirror 6,deferred,MIT,https://github.com/codemirror/dev,planned SQL editor,no,Lock before distribution
 VXE-Table,4.21.5,MIT,https://github.com/x-extends/vxe-table,remote paged database result grid,no,Include MIT notice
