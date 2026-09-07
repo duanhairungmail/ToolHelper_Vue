@@ -16,3 +16,4 @@ public/runtime-config.js
 *.suo
 .DS_Store
 Thumbs.db
+test-runtime/
