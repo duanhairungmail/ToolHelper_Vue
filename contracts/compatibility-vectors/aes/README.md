@@ -2,7 +2,8 @@
 
 向量按原始 `Views/Crypto/AesView.cs` 的参数归一化和输出格式建立，当前状态为草拟/待目标环境复核：
 
-- CBC、ECB、OFB、CFB、CTR、GCM 各包含至少一个可复现输入。
+- CBC、ECB、CFB、CTR、GCM 各包含至少一个可复现输入；CFB 已锁定为旧 .NET 默认的 8 位反馈宽度。
+- 当前 Windows .NET 8 Aes Provider 实测拒绝 OFB 与 CTS；两项保持阻断状态，不将 Java Provider 输出当作旧版兼容证据。
 - CTS 单独记录了当前 .NET provider 的不支持错误，不能将该错误当作兼容成功。
 - 统一覆盖 0、15、16、17 字节边界清单；后续需要补齐短/长 Key、IV、六种编码和五种填充的实测结果。
 - GCM 记录 `nonce(12) + tag(16) + ciphertext` 组合格式和篡改测试项。

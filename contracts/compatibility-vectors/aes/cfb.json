@@ -1,7 +1,7 @@
 {
   "mode": "CFB",
-  "status": "draft",
-  "sourceBehavior": "System.Security.Cryptography.Aes CFB; IV 截取或右补零至 16 字节。",
+  "status": "csharp-verified",
+  "sourceBehavior": "System.Security.Cryptography.Aes CFB（默认 8 位反馈宽度）；IV 截取或右补零至 16 字节。",
   "cases": [
     {
       "caseId": "aes-cfb-none-128-hex-001",
@@ -13,9 +13,9 @@
       "key": "000102030405060708090a0b0c0d0e0f",
       "iv": "101112131415161718191a1b1c1d1e1f",
       "input": "00112233445566778899aabbccddeeff",
-      "expectedCiphertext": "07efcd47a5806519189744aa42497c6c",
+      "expectedCiphertext": "07975727c77c260f1936be5ff9c9d3c2",
       "expectedRoundTrip": true,
-      "generatedBy": "Node.js crypto AES-128-CFB; confirm provider feedback width against original C#"
+      "generatedBy": "原始 C# .NET 8 Aes 默认 CFB 反馈宽度实测；Java 使用 AES/CFB8/NoPadding"
     }
   ],
   "boundaryInputs": [0, 15, 16, 17]

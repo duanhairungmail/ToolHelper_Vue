@@ -44,7 +44,8 @@ public final class BouncyCastleCipherAdapter implements AesCipherAdapter {
             case CBC -> "AES/CBC/NoPadding";
             case ECB -> "AES/ECB/NoPadding";
             case OFB -> "AES/OFB/NoPadding";
-            case CFB -> "AES/CFB/NoPadding";
+            // .NET Aes 默认 CFB 反馈宽度为 8 位；CFB128 会产生不同密文。
+            case CFB -> "AES/CFB8/NoPadding";
             case CTS -> "AES/CTS/NoPadding";
             case GCM -> "AES/GCM/NoPadding";
             case CTR -> "AES/ECB/NoPadding";

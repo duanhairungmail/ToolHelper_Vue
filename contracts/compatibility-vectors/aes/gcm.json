@@ -1,6 +1,6 @@
 {
   "mode": "GCM",
-  "status": "draft",
+  "status": "csharp-verified",
   "sourceBehavior": "AesGcm；nonce 取 IV 前 12 字节或右补零；tag 固定 16 字节；输出 nonce + tag + ciphertext；无 AAD。",
   "cases": [
     {

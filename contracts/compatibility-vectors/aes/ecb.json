@@ -1,6 +1,6 @@
 {
   "mode": "ECB",
-  "status": "draft",
+  "status": "csharp-verified",
   "sourceBehavior": "System.Security.Cryptography.Aes; ECB 不读取 IV；Key 按目标长度截取或右补零。",
   "cases": [
     {

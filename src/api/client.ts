@@ -14,6 +14,7 @@ export async function request<T>(url: string, options: RequestOptions = {}): Pro
     const headers = new Headers(init.headers)
     headers.set('Accept', 'application/json')
     headers.set('X-Trace-Id', createTraceId())
+    headers.set('Origin', window.location.origin)
     if (runtime.sessionToken) headers.set('Authorization', `Bearer ${runtime.sessionToken}`)
     const response = await fetch(url, { ...init, headers, signal: controller.signal })
     const payload = await response.json() as ApiResponse<T> | T

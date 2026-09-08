@@ -1,6 +1,6 @@
 {
   "mode": "CTR",
-  "status": "draft",
+  "status": "csharp-verified",
   "sourceBehavior": "原始代码使用 AES-ECB 生成密钥流，计数器从 IV 末字节向前进位递增；忽略 padding。",
   "cases": [
     {
