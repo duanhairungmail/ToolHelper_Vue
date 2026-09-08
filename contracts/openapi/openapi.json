@@ -81,6 +81,28 @@
         "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AesRequest" } } } },
         "responses": { "200": { "description": "AES decrypted response" }, "400": { "description": "AES request invalid" } }
       }
+    },
+    "/api/java/kylin/sessions": {
+      "post": { "summary": "Open SSH and SFTP KylinOS session", "security": [{ "bearerAuth": [] }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/KylinSessionRequest" } } } }, "responses": { "200": { "description": "Session opened" } } }
+    },
+    "/api/java/kylin/sessions/{sessionId}": {
+      "get": { "summary": "Get KylinOS session", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "sessionId", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Session state" } } },
+      "delete": { "summary": "Close KylinOS session", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "sessionId", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Session closed" } } }
+    },
+    "/api/java/kylin/sessions/{sessionId}/confirmations": {
+      "post": { "summary": "Issue short-lived change confirmation", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "sessionId", "in": "path", "required": true, "schema": { "type": "string" } }, { "name": "operation", "in": "query", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Confirmation token" } } }
+    },
+    "/api/java/kylin/sessions/{sessionId}/jobs": {
+      "post": { "summary": "Submit whitelisted KylinOS operation", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "sessionId", "in": "path", "required": true, "schema": { "type": "string" } }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/KylinJobRequest" } } } }, "responses": { "200": { "description": "Job accepted" } } }
+    },
+    "/api/java/jobs/{jobId}": {
+      "get": { "summary": "Get KylinOS job", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "jobId", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Job state" } } }
+    },
+    "/api/java/jobs/{jobId}/events": {
+      "get": { "summary": "KylinOS job event stream", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "jobId", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "SSE stream", "content": { "text/event-stream": {} } } } }
+    },
+    "/api/java/jobs/{jobId}/cancel": {
+      "post": { "summary": "Cancel KylinOS job", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "jobId", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Cancel requested" } } }
     }
   },
   "components": {
@@ -161,6 +183,14 @@
           "iv": { "type": "string" },
           "input": { "type": "string" }
         }
+      },
+      "KylinSessionRequest": {
+        "type": "object", "required": ["host", "username"],
+        "properties": { "host": { "type": "string" }, "port": { "type": "integer", "default": 22 }, "username": { "type": "string" }, "password": { "type": "string", "writeOnly": true }, "privateKey": { "type": "string", "writeOnly": true }, "privateKeyPassphrase": { "type": "string", "writeOnly": true }, "sudoPassword": { "type": "string", "writeOnly": true } }
+      },
+      "KylinJobRequest": {
+        "type": "object", "required": ["operation"],
+        "properties": { "operation": { "type": "string" }, "confirmationToken": { "type": "string", "writeOnly": true }, "confirm": { "type": "boolean" } }
       }
     },
     "/api/local/ping/targets/expand": {
