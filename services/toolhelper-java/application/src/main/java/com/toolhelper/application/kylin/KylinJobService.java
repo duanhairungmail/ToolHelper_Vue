@@ -21,7 +21,7 @@ public class KylinJobService {
     public KylinContracts.Confirmation issueConfirmation(String sessionId, KylinOperation operation) { sessions.require(sessionId); String token=UUID.randomUUID().toString(); Instant expires=Instant.now().plus(CONFIRMATION_TTL); confirmations.put(token,new Confirmation(sessionId,operation,expires)); return new KylinContracts.Confirmation(token,expires); }
     public KylinContracts.JobInfo submit(String sessionId, KylinContracts.CreateJobRequest request) {
         sessions.require(sessionId); if (request.operation()==null) throw new IllegalArgumentException("操作不能为空");
-        Confirmation expected=confirmations.remove(request.confirmationToken());
+        Confirmation expected=request.confirmationToken() == null ? null : confirmations.remove(request.confirmationToken());
         if (!isScan(request.operation()) && (!request.confirm() || expected==null || !expected.matches(sessionId,request.operation()) || expected.expires.isBefore(Instant.now()))) throw new KylinSessionService.KylinSessionException("CONFIRMATION_REQUIRED","变更操作需要有效确认令牌");
         Job job=new Job(UUID.randomUUID().toString(),sessionId,request.operation()); jobs.put(job.id,job); executor.submit(() -> run(job)); return job.info();
     }
