@@ -17,7 +17,8 @@ System.Security.Cryptography.Xml,8.0.4,MIT,https://github.com/dotnet/runtime,ori
 System.IO.Ports,10.0.9,MIT,https://github.com/dotnet/runtime,original C# serial,no,Microsoft runtime license
 System.Data.OleDb,10.0.0,MIT,https://github.com/dotnet/runtime,original C# Access/Excel,no,Microsoft runtime license
 DocumentFormat.OpenXml,3.2.0,MIT,https://github.com/dotnet/Open-XML-SDK,original C# OpenXML export,no,Include MIT notice
-Electerm Web,version to lock,MIT,https://github.com/electerm/electerm-web,planned remote integration,no,Lock release/version before distribution
+Electerm Web,5.3.26,MIT,https://github.com/electerm/electerm-web,managed remote integration,yes,See electerm-web-MIT.txt and installer/electerm/README.md; source commit 54cae0be962f2c948c84067a2eee279632f49371
+Node.js Electerm runtime,24.19.0,MIT,https://nodejs.org/dist/v24.19.0/,bundled Windows X64 runtime,no,Official SHA-256 pinned; runtime LICENSE bundled; no global Node required
 Node.js,22.23.1,MIT,https://nodejs.org,planned bundled runtime,no,Include Node.js license and notices
 Node-RED,5.0.4,Apache-2.0,https://github.com/node-red/node-red,planned bundled runtime,no,Lock dependency tree before distribution
 node-red-node-serialport,2.0.3,Apache-2.0,https://github.com/node-red/node-red-nodes,planned Node-RED node,no,Verify package notice

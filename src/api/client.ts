@@ -19,7 +19,8 @@ export async function request<T>(url: string, options: RequestOptions = {}): Pro
     const response = await fetch(url, { ...init, headers, signal: controller.signal })
     const payload = await response.json() as ApiResponse<T> | T
     if (!response.ok) {
-      throw new ApiError(`请求失败：${response.status}`, { status: response.status })
+      const result = payload && typeof payload === 'object' && 'success' in payload ? payload as ApiResponse<T> : undefined
+      throw new ApiError(result?.message || `请求失败：${response.status}`, { status: response.status, code: result?.code, traceId: result?.traceId })
     }
     if (payload && typeof payload === 'object' && 'success' in payload && payload.success === false) {
       const result = payload as ApiResponse<T>

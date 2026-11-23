@@ -6,6 +6,43 @@
   },
   "servers": [{ "url": "http://127.0.0.1" }],
   "paths": {
+    "/api/integrations/electerm/status": {
+      "get": { "summary": "Read managed Electerm process and page readiness", "security": [{ "bearerAuth": [] }], "responses": { "200": { "$ref": "#/components/responses/ElectermStatusResponse" } } }
+    },
+    "/api/integrations/electerm/install": {
+      "post": {
+        "summary": "Install or upgrade from configured signed feed or offline package",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": false, "content": {
+          "application/json": { "schema": { "type": "object", "additionalProperties": false, "properties": { "offlinePackage": { "type": "string", "description": "Filename in the configured server inbox; never an arbitrary path or URL" } } } },
+          "multipart/form-data": { "schema": { "type": "object", "required": ["package"], "properties": { "package": { "type": "string", "format": "binary" } } } }
+        } },
+        "responses": { "200": { "$ref": "#/components/responses/ElectermStatusResponse" }, "409": { "description": "Signature, package, platform, backup or readiness error; an existing installation is preserved or rolled back" } }
+      }
+    },
+    "/api/integrations/electerm/start": {
+      "post": { "summary": "Start one managed Electerm instance", "security": [{ "bearerAuth": [] }], "responses": { "200": { "$ref": "#/components/responses/ElectermStatusResponse" }, "409": { "description": "Not installed, ownership conflict, port conflict or readiness timeout" } } }
+    },
+    "/api/integrations/electerm/stop": {
+      "post": { "summary": "Stop only the process tree owned by this ToolHelper instance", "security": [{ "bearerAuth": [] }], "responses": { "200": { "$ref": "#/components/responses/ElectermStatusResponse" } } }
+    },
+    "/api/integrations/electerm/restart": {
+      "post": { "summary": "Restart the managed Electerm instance", "security": [{ "bearerAuth": [] }], "responses": { "200": { "$ref": "#/components/responses/ElectermStatusResponse" } } }
+    },
+    "/api/integrations/electerm/logs": {
+      "get": { "summary": "Read bounded lifecycle diagnostics without raw upstream credentials or URL logs", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "ApiResponse containing an array of diagnostic strings" } } }
+    },
+    "/api/integrations/electerm/purge-confirmation": {
+      "post": { "summary": "Request a single-use 120-second confirmation for complete data removal", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "ApiResponse containing token and expiresAt" } } }
+    },
+    "/api/integrations/electerm/uninstall": {
+      "post": {
+        "summary": "Uninstall; preserve data by default; purge requires explicit confirmation",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": false, "content": { "application/json": { "schema": { "type": "object", "properties": { "purgeData": { "type": "boolean", "default": false }, "confirmationToken": { "type": "string", "writeOnly": true } } } } } },
+        "responses": { "200": { "$ref": "#/components/responses/ElectermStatusResponse" }, "409": { "description": "PURGE_CONFIRMATION_REQUIRED or UNINSTALL_FAILED" } }
+      }
+    },
     "/actuator/health": {
       "get": {
         "summary": "Java service health",
@@ -110,6 +147,18 @@
       "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "ToolHelper service token" }
     },
     "schemas": {
+      "ElectermStatus": {
+        "type": "object",
+        "required": ["state", "port", "instanceId"],
+        "properties": {
+          "state": { "type": "string", "enum": ["NOT_INSTALLED", "STOPPED", "STARTING", "RUNNING"] },
+          "pid": { "type": ["integer", "null"] }, "startedAt": { "type": ["string", "null"], "format": "date-time" },
+          "version": { "type": ["string", "null"] }, "nodeVersion": { "type": ["string", "null"] },
+          "port": { "type": "integer", "default": 5577 }, "instanceId": { "type": "string" },
+          "url": { "type": ["string", "null"], "pattern": "^http://127\\.0\\.0\\.1:[0-9]+/$" },
+          "diagnostic": { "type": ["string", "null"] }
+        }
+      },
       "ApiResponse": {
         "type": "object",
         "required": ["success", "code", "message", "traceId"],
@@ -222,6 +271,10 @@
       "get": { "summary": "Export group Ping results", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "jobId", "in": "path", "required": true, "schema": { "type": "string" } }, { "name": "format", "in": "query", "schema": { "type": "string", "enum": ["csv", "xlsx"] } }], "responses": { "200": { "description": "Export file" } } }
     },
     "responses": {
+      "ElectermStatusResponse": {
+        "description": "Common ApiResponse with an ElectermStatus payload",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/ApiResponse" }, { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/ElectermStatus" } } }] } } }
+      },
       "HealthResponse": {
         "description": "Health response",
         "headers": { "X-Trace-Id": { "schema": { "type": "string" } } },

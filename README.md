@@ -18,7 +18,7 @@ npm run dev
 
 浏览器访问终端输出的本地地址。
 
-默认地址为 `http://127.0.0.1:5173/`，根路径和未知路径都会重定向到 `/remote`。除远程页外，工具页面位于 `/tools/<tool-id>`；当前业务动作仍由显式 mock service 返回，并会显示“演示模式”。
+默认地址为 `http://127.0.0.1:5173/`，根路径和未知路径都会重定向到 `/remote`。工具页面位于 `/tools/<tool-id>`；尚未迁移的业务动作仍由显式 mock service 返回并显示“演示模式”。远程页已通过 Java 管理本机 Electerm Web，不再打开公共演示站点。
 
 ## Launcher 统一启动
 
@@ -43,6 +43,8 @@ Launcher 注入的 `runtime-config.js` 已被 Git 忽略，禁止将实际令牌
 数据库工作台使用 Java 独占的内部库（默认 `%LOCALAPPDATA%/ToolHelper/data/toolhelper.db`）记录任务和审计；用户 `.db`、`.sqlite`、`.sqlite3` 通过独立会话池打开，禁止指向内部目录。查询结果由 VXE-Table 展示并按页返回，导出文件为 Excel 兼容 CSV；SQLite 锁定、只读、损坏和磁盘不足会返回稳定错误码。
 
 ## 生产构建
+
+Electerm Web 集成使用固定的 5.3.26 源码和独立 Node.js 24.19.0 Windows X64 运行时，支持受控源安装、签名离线包导入、进程管理、备份及升级失败回滚。构建方式、发布公钥配置、首次登录与目录说明见 [Electerm 集成说明](installer/electerm/README.md)。Java 未配置发布公钥时会拒绝安装；生产签名私钥和实际受控发布地址由发布方提供。
 
 ```bash
 npm run build

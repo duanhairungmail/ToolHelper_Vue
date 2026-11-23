@@ -17,3 +17,4 @@ public/runtime-config.js
 .DS_Store
 Thumbs.db
 test-runtime/
+installer/electerm/artifacts/
