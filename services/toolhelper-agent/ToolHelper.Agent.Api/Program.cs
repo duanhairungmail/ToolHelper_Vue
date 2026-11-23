@@ -24,6 +24,7 @@ var javaApiBase = builder.Configuration["TOOLHELPER_JAVA_API_BASE"] ?? Environme
 builder.Services.AddSingleton(new RuntimeOptions { SessionToken = sessionToken, InternalToken = internalToken, AllowedOrigins = origins, JavaApiBase = javaApiBase });
 builder.Services.AddSingleton<ExpandTargetsUseCase>();
 builder.Services.AddSingleton<SystemPingExecutor>();
+builder.Services.AddSingleton<SerialPortLeaseClient>();
 builder.Services.AddSingleton<IPingExecutor>(sp => sp.GetRequiredService<SystemPingExecutor>());
 builder.Services.AddSingleton<CsvPingExporter>();
 builder.Services.AddSingleton<ClosedXmlPingExporter>();
@@ -43,6 +44,7 @@ app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
     var traceId = context.Items.TryGetValue(TraceIdMiddleware.Key, out var value) && value is string id ? id : Guid.NewGuid().ToString("N");
     var (status, code, message) = exception switch
     {
+        SerialPortLeaseException conflict => (StatusCodes.Status409Conflict, conflict.Code, conflict.Message),
         ArgumentException argument => (StatusCodes.Status400BadRequest, "PING_REQUEST_INVALID", argument.Message),
         KeyNotFoundException missing => (StatusCodes.Status404NotFound, "PING_JOB_NOT_FOUND", missing.Message),
         _ => (StatusCodes.Status500InternalServerError, "PING_INTERNAL_ERROR", "群 Ping 服务内部错误")
@@ -59,6 +61,18 @@ app.MapGet("/health", (HttpContext context) =>
     var traceId = (string)context.Items[TraceIdMiddleware.Key]!;
     return Results.Ok(new ApiResponse<HealthData>(true, "OK", "服务正常", new HealthData(
         DomainMarker.ServiceName, "0.1.0", "UP", traceId), traceId));
+});
+
+// 此处仅负责串口预留；实际串口调试迁移时必须先预留再打开句柄，关闭句柄后才能释放。
+app.MapPost("/api/local/serial/reservations", async (SerialReservation request, SerialPortLeaseClient leases, HttpContext context) =>
+{
+    var lease = await leases.AcquireAsync(request.Port, context.RequestAborted);
+    return Results.Ok(new ApiResponse<object>(true, "OK", "串口已预留，尚未打开物理设备", lease, (string)context.Items[TraceIdMiddleware.Key]!));
+});
+app.MapDelete("/api/local/serial/reservations/{id}", async (string id, SerialPortLeaseClient leases, HttpContext context) =>
+{
+    await leases.ReleaseAsync(id, context.RequestAborted);
+    return Results.Ok(new ApiResponse<object?>(true, "OK", "串口预留已释放", null, (string)context.Items[TraceIdMiddleware.Key]!));
 });
 
 app.MapGet("/api/jobs/{jobId}/events", async (string jobId, HttpContext context) =>
@@ -124,3 +138,5 @@ app.MapGet("/api/local/ping/jobs/{jobId}/export", (string jobId, string? format,
 });
 
 app.Run();
+
+public sealed record SerialReservation(string Port);

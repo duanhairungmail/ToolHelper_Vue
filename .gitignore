@@ -18,3 +18,4 @@ public/runtime-config.js
 Thumbs.db
 test-runtime/
 installer/electerm/artifacts/
+installer/nodered/artifacts/

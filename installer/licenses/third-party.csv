@@ -19,10 +19,10 @@ System.Data.OleDb,10.0.0,MIT,https://github.com/dotnet/runtime,original C# Acces
 DocumentFormat.OpenXml,3.2.0,MIT,https://github.com/dotnet/Open-XML-SDK,original C# OpenXML export,no,Include MIT notice
 Electerm Web,5.3.26,MIT,https://github.com/electerm/electerm-web,managed remote integration,yes,See electerm-web-MIT.txt and installer/electerm/README.md; source commit 54cae0be962f2c948c84067a2eee279632f49371
 Node.js Electerm runtime,24.19.0,MIT,https://nodejs.org/dist/v24.19.0/,bundled Windows X64 runtime,no,Official SHA-256 pinned; runtime LICENSE bundled; no global Node required
-Node.js,22.23.1,MIT,https://nodejs.org,planned bundled runtime,no,Include Node.js license and notices
-Node-RED,5.0.4,Apache-2.0,https://github.com/node-red/node-red,planned bundled runtime,no,Lock dependency tree before distribution
-node-red-node-serialport,2.0.3,Apache-2.0,https://github.com/node-red/node-red-nodes,planned Node-RED node,no,Verify package notice
-node-red-contrib-modbus,5.60.2,MIT,https://flows.nodered.org/node/node-red-contrib-modbus,planned Node-RED node,no,Verify package notice
+Node.js Node-RED runtime,24.19.0,MIT,https://nodejs.org/dist/v24.19.0/,managed Windows X64 runtime,no,Official SHA-256 pinned; runtime LICENSE bundled; main package excludes runtime
+Node-RED,5.0.10,Apache-2.0,https://github.com/node-red/node-red,managed flow editor and runtime,no,See installer/nodered/README.md; upstream LICENSE and dependency notices bundled
+node-red-node-serialport,2.0.3,Apache-2.0,https://github.com/node-red/node-red-nodes,managed Node-RED serial node,no,Exact dependencies in installer/nodered/package-lock.json; bundled package license
+node-red-contrib-modbus,5.62.1,BSD-3-Clause,https://github.com/BiancoRoyal/node-red-contrib-modbus,managed Node-RED Modbus node,no,Bundled package LICENSE; upstream package metadata corrects previous MIT placeholder
 x11vnc,source binary, GPL-2.0-or-later,https://github.com/LibVNC/x11vnc,planned KylinOS VNC deployment,no,Verify binary provenance and source offer
 KylinOS offline patch,1.0.0.33-0k1.11,license to verify,local Resources/plugins/Security patch,planned KylinOS vulnerability repair,no,Do not distribute until license is verified
 DBX,version to lock,license to verify,https://github.com/t8y2/dbx,planned database integration,no,Do not distribute until license is verified

@@ -76,6 +76,7 @@ public final class LauncherMain {
                     "TOOLHELPER_ALLOWED_ORIGINS", frontendOrigin);
             Map<String, String> csharpEnvironment = Map.of(
                     "TOOLHELPER_LOCAL_PORT", Integer.toString(localPort),
+                    "TOOLHELPER_JAVA_API_BASE", "http://127.0.0.1:" + javaPort,
                     "TOOLHELPER_SESSION_TOKEN", sessionToken,
                     "TOOLHELPER_INTERNAL_TOKEN", internalToken,
                     "TOOLHELPER_ALLOWED_ORIGINS", frontendOrigin);

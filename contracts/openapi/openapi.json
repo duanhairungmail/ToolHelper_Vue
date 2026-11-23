@@ -6,6 +6,61 @@
   },
   "servers": [{ "url": "http://127.0.0.1" }],
   "paths": {
+    "/api/integrations/nodered/status": {
+      "get": { "summary": "Read managed Node-RED status and exact loopback URL", "security": [{ "bearerAuth": [] }], "responses": { "200": { "$ref": "#/components/responses/NodeRedStatusResponse" } } }
+    },
+    "/api/integrations/nodered/install": {
+      "post": { "summary": "Explicitly confirm signed fixed-version installation", "security": [{ "bearerAuth": [] }], "requestBody": { "$ref": "#/components/requestBodies/NodeRedInstall" }, "responses": { "200": { "$ref": "#/components/responses/NodeRedStatusResponse" }, "409": { "description": "Stable confirmation, trust, package, backup or rollback error" } } }
+    },
+    "/api/integrations/nodered/updates": {
+      "post": { "summary": "Confirmed signed upgrade with pre-upgrade snapshot and rollback", "security": [{ "bearerAuth": [] }], "requestBody": { "$ref": "#/components/requestBodies/NodeRedInstall" }, "responses": { "200": { "$ref": "#/components/responses/NodeRedStatusResponse" } } }
+    },
+    "/api/integrations/nodered/start": {
+      "post": { "summary": "Start one managed Node-RED instance", "security": [{ "bearerAuth": [] }], "responses": { "200": { "$ref": "#/components/responses/NodeRedStatusResponse" } } }
+    },
+    "/api/integrations/nodered/stop": {
+      "post": { "summary": "Stop managed process tree regardless of flow state", "security": [{ "bearerAuth": [] }], "responses": { "200": { "$ref": "#/components/responses/NodeRedStatusResponse" } } }
+    },
+    "/api/integrations/nodered/restart": {
+      "post": { "summary": "Restart the managed instance", "security": [{ "bearerAuth": [] }], "responses": { "200": { "$ref": "#/components/responses/NodeRedStatusResponse" } } }
+    },
+    "/api/integrations/nodered/runtime": {
+      "delete": { "summary": "Uninstall runtime and preserve flows, credentials and backups", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "confirmed", "in": "query", "required": true, "schema": { "type": "boolean", "const": true } }], "responses": { "200": { "$ref": "#/components/responses/NodeRedStatusResponse" } } }
+    },
+    "/api/integrations/nodered/events": {
+      "get": { "summary": "Bounded lifecycle SSE with in-process replay", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "Last-Event-ID", "in": "header", "schema": { "type": "string" } }], "responses": { "200": { "description": "SseEvent stream; latest 200 events", "content": { "text/event-stream": {} } } } }
+    },
+    "/api/integrations/nodered/backups": {
+      "post": { "summary": "Quiesced userDir and DPAPI sealed-key snapshot", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "ApiResponse with backup filename string" } } }
+    },
+    "/api/integrations/nodered/restore": {
+      "post": { "summary": "Confirmed same-user snapshot restore with safety rollback", "security": [{ "bearerAuth": [] }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["id", "confirmed"], "properties": { "id": { "type": "string" }, "confirmed": { "type": "boolean", "const": true } } } } } }, "responses": { "200": { "$ref": "#/components/responses/NodeRedStatusResponse" } } }
+    },
+    "/api/integrations/nodered/nodes/review": {
+      "post": { "summary": "Inspect signed prebuilt node bundle without running scripts", "security": [{ "bearerAuth": [] }], "requestBody": { "required": true, "content": { "multipart/form-data": { "schema": { "$ref": "#/components/schemas/NodeRedUpload" } } } }, "responses": { "200": { "description": "ApiResponse of inspection id, sha256, review, allowlisted, approved, expiresAt; see installer/nodered/README.md" } } }
+    },
+    "/api/integrations/nodered/nodes/{id}/approve": {
+      "post": { "summary": "Human review approval distinct from execution confirmation", "security": [{ "bearerAuth": [] }], "parameters": [{ "$ref": "#/components/parameters/NodeReviewId" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["reviewer", "reason"], "properties": { "reviewer": { "type": "string", "minLength": 1, "maxLength": 80 }, "reason": { "type": "string", "minLength": 1, "maxLength": 1000 } } } } } }, "responses": { "200": { "description": "Updated node inspection" } } }
+    },
+    "/api/integrations/nodered/nodes/{id}/install": {
+      "post": { "summary": "One-use approved node installation after explicit confirmation", "security": [{ "bearerAuth": [] }], "parameters": [{ "$ref": "#/components/parameters/NodeReviewId" }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["confirmed"], "properties": { "confirmed": { "type": "boolean", "const": true } } } } } }, "responses": { "200": { "$ref": "#/components/responses/NodeRedStatusResponse" }, "409": { "description": "Unapproved, expired, unconfirmed, invalid or rolled-back node update" } } }
+    },
+    "/api/integrations/nodered/nodes/{id}": {
+      "delete": { "summary": "Cancel pending review; do not execute scripts", "security": [{ "bearerAuth": [] }], "parameters": [{ "$ref": "#/components/parameters/NodeReviewId" }], "responses": { "200": { "description": "Cancelled" } } }
+    },
+    "/api/internal/v1/serial/leases": {
+      "get": { "summary": "List verified live serial leases", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "ApiResponse array of id, port, owner, pid, startedAt, releaseHint" } } },
+      "post": { "summary": "Managed Node-RED/C# service acquires exclusive COM lease; browser token is read-only", "security": [{ "bearerAuth": [] }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["port", "pid"], "properties": { "port": { "type": "string" }, "pid": { "type": "integer", "format": "int64" } } } } } }, "responses": { "200": { "description": "Acquired lease" }, "409": { "description": "SERIAL_PORT_IN_USE, SERIAL_OWNER_INVALID or SERIAL_PORT_INVALID" } } }
+    },
+    "/api/internal/v1/serial/leases/{id}": {
+      "delete": { "summary": "Release own service lease after device close", "security": [{ "bearerAuth": [] }], "parameters": [{ "$ref": "#/components/parameters/NodeReviewId" }], "responses": { "200": { "description": "Released" } } }
+    },
+    "/api/local/serial/reservations": {
+      "post": { "summary": "C# reserves COM via Java; does not open physical device", "security": [{ "bearerAuth": [] }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["port"], "properties": { "port": { "type": "string" } } } } } }, "responses": { "200": { "description": "Serial lease" } } }
+    },
+    "/api/local/serial/reservations/{id}": {
+      "delete": { "summary": "C# releases its reservation", "security": [{ "bearerAuth": [] }], "parameters": [{ "$ref": "#/components/parameters/NodeReviewId" }], "responses": { "200": { "description": "Released" } } }
+    },
     "/api/integrations/electerm/status": {
       "get": { "summary": "Read managed Electerm process and page readiness", "security": [{ "bearerAuth": [] }], "responses": { "200": { "$ref": "#/components/responses/ElectermStatusResponse" } } }
     },
@@ -143,10 +198,29 @@
     }
   },
   "components": {
+    "parameters": {
+      "NodeReviewId": { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+    },
+    "requestBodies": {
+      "NodeRedInstall": { "required": true, "content": {
+        "application/json": { "schema": { "type": "object", "required": ["confirmed"], "properties": { "confirmed": { "type": "boolean", "const": true }, "offlinePackage": { "type": "string", "description": "Server inbox filename, never an arbitrary path or URL" } } } },
+        "multipart/form-data": { "schema": { "$ref": "#/components/schemas/NodeRedUpload" } }
+      } }
+    },
     "securitySchemes": {
       "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "ToolHelper service token" }
     },
     "schemas": {
+      "NodeRedUpload": { "type": "object", "required": ["package", "confirmed"], "properties": { "package": { "type": "string", "format": "binary" }, "confirmed": { "type": "boolean", "const": true } } },
+      "NodeRedStatus": {
+        "type": "object", "required": ["state", "port", "instanceId"],
+        "properties": {
+          "state": { "type": "string", "enum": ["NOT_INSTALLED", "STOPPED", "STARTING", "RUNNING"] },
+          "pid": { "type": ["integer", "null"], "format": "int64" }, "startedAt": { "type": ["string", "null"], "format": "date-time" },
+          "version": { "type": ["string", "null"] }, "nodeVersion": { "type": ["string", "null"] }, "port": { "type": "integer" },
+          "instanceId": { "type": "string" }, "url": { "type": ["string", "null"] }, "diagnostic": { "type": ["string", "null"] }
+        }
+      },
       "ElectermStatus": {
         "type": "object",
         "required": ["state", "port", "instanceId"],
@@ -271,6 +345,10 @@
       "get": { "summary": "Export group Ping results", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "jobId", "in": "path", "required": true, "schema": { "type": "string" } }, { "name": "format", "in": "query", "schema": { "type": "string", "enum": ["csv", "xlsx"] } }], "responses": { "200": { "description": "Export file" } } }
     },
     "responses": {
+      "NodeRedStatusResponse": {
+        "description": "Common ApiResponse with a NodeRedStatus payload",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/ApiResponse" }, { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/NodeRedStatus" } } }] } } }
+      },
       "ElectermStatusResponse": {
         "description": "Common ApiResponse with an ElectermStatus payload",
         "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/ApiResponse" }, { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/ElectermStatus" } } }] } } }

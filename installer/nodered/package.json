@@ -1,0 +1,12 @@
+{
+  "name": "toolhelper-managed-nodered",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ToolHelper 构建机使用的固定 Node-RED 依赖组合；目标机器禁止 npm install",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "node-red": "5.0.10",
+    "node-red-node-serialport": "2.0.3",
+    "node-red-contrib-modbus": "5.62.1"
+  }
+}

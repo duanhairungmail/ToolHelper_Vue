@@ -3,6 +3,7 @@ package com.toolhelper.api.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.toolhelper.application.contract.ApiResponse;
 import com.toolhelper.infrastructure.RuntimeProperties;
+import com.toolhelper.application.nodered.SerialPortCoordinator;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,10 +21,12 @@ public class RequestSecurityFilter extends OncePerRequestFilter {
     public static final String TRACE_ID = "toolhelper.traceId";
     private final RuntimeProperties properties;
     private final ObjectMapper objectMapper;
+    private final SerialPortCoordinator serialPorts;
 
-    public RequestSecurityFilter(RuntimeProperties properties, ObjectMapper objectMapper) {
+    public RequestSecurityFilter(RuntimeProperties properties, ObjectMapper objectMapper, SerialPortCoordinator serialPorts) {
         this.properties = properties;
         this.objectMapper = objectMapper;
+        this.serialPorts = serialPorts;
     }
 
     @Override
@@ -61,7 +64,10 @@ public class RequestSecurityFilter extends OncePerRequestFilter {
             return;
         }
         byte[] expected = properties.internalToken().getBytes(StandardCharsets.UTF_8);
-        if (!matches(presented, properties.sessionToken()) && !MessageDigest.isEqual(presented.getBytes(StandardCharsets.UTF_8), expected)) {
+        boolean serialRequest = request.getRequestURI().equals("/api/internal/v1/serial/leases")
+                || request.getRequestURI().startsWith("/api/internal/v1/serial/leases/");
+        if (!matches(presented, properties.sessionToken()) && !MessageDigest.isEqual(presented.getBytes(StandardCharsets.UTF_8), expected)
+                && !(serialRequest && serialPorts.matchesNodeRedToken(presented))) {
             reject(response, 401, "AUTH_INVALID", "服务令牌无效", traceId);
             return;
         }

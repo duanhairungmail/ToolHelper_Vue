@@ -46,6 +46,8 @@ Launcher 注入的 `runtime-config.js` 已被 Git 忽略，禁止将实际令牌
 
 Electerm Web 集成使用固定的 5.3.26 源码和独立 Node.js 24.19.0 Windows X64 运行时，支持受控源安装、签名离线包导入、进程管理、备份及升级失败回滚。构建方式、发布公钥配置、首次登录与目录说明见 [Electerm 集成说明](installer/electerm/README.md)。Java 未配置发布公钥时会拒绝安装；生产签名私钥和实际受控发布地址由发布方提供。
 
+Node-RED 页面已接入 Java 受控生命周期，固定 Node-RED 5.0.10、Node.js 24.19.0、串口节点 2.0.3 与 Modbus 节点 5.62.1，提供签名离线包、独立认证、DPAPI 凭据密钥、节点审阅审批及备份恢复。构建、信任根、首次登录和串口协调接入边界见 [Node-RED 集成说明](installer/nodered/README.md)。此实现不代表阶段验收通过；串口调试页本身仍是原有演示实现。
+
 ```bash
 npm run build
 ```
